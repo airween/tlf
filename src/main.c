@@ -631,7 +631,7 @@ int databases_load()
 	}
 	nr_qsosflags_for_qtc = nr_qsos;
 	readqtccalls();
-      
+
     }
     return 0;
 }
