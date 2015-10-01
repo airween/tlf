@@ -32,10 +32,22 @@
 #include <xmlrpc-c/client.h>
 #endif
 
+#ifdef HAVE_LIBHAMLIB
+#include <hamlib/rig.h>
+#endif
+
 #define NAME "Tlf"
 #define XMLRPCVERSION "1.0"
 
+#include <syslog.h>
+
+/* #define CENTER_FREQ 2210 */
+#define CENTER_FREQ 1210
+
+extern RIG *my_rig;
+
 int fldigi_var_carrier = 0;
+int fldigi_var_carrier_shift = 0;
 
 int fldigi_xmlrpc_get_carrier() {
 
@@ -47,6 +59,8 @@ int fldigi_xmlrpc_get_carrier() {
     xmlrpc_value * result;
     xmlrpc_int32 sum;
     xmlrpc_env_init(&env);
+    freq_t rigfreq;
+    int retval;
 
     static int errflg;
     static int trycnt;
@@ -61,6 +75,7 @@ int fldigi_xmlrpc_get_carrier() {
     trycnt = 0;
     const char * const serverUrl = "http://localhost:7362/RPC2";
     const char * const methodName = "modem.get_carrier";
+    const char * const setmethodName = "modem.set_carrier";
 
     xmlrpc_client_init2(&env, XMLRPC_CLIENT_NO_FLAGS, NAME, XMLRPCVERSION, NULL, 0);
     if (env.fault_occurred) {
@@ -85,6 +100,16 @@ int fldigi_xmlrpc_get_carrier() {
     }
     fldigi_var_carrier = (int)sum;
 
+#ifdef HAVE_LIBHAMLIB
+    if (fldigi_var_carrier != CENTER_FREQ && abs(CENTER_FREQ - fldigi_var_carrier) > 20) {
+	result = xmlrpc_client_call(&env, serverUrl, setmethodName,
+                                 "(ii)", (xmlrpc_int32) CENTER_FREQ, (xmlrpc_int32) 7);
+	retval = rig_get_freq(my_rig, RIG_VFO_CURR, &rigfreq);
+	rigfreq += (freq_t)(CENTER_FREQ-fldigi_var_carrier);
+	retval = rig_set_freq(my_rig, RIG_VFO_CURR, rigfreq);
+    }
+#endif
+    
     xmlrpc_DECREF(result);
     xmlrpc_env_clean(&env);
     xmlrpc_client_cleanup();
@@ -96,7 +121,8 @@ int fldigi_xmlrpc_get_carrier() {
 
 int fldigi_get_carrier() {
 #ifdef HAVE_LIBXMLRPC
-        return fldigi_var_carrier;
+        //return fldigi_var_carrier;
+        return 0;
 #else
         return 0;
 #endif

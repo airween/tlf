@@ -28,7 +28,6 @@
 #include "sendbuf.h"
 #include <glib.h>
 
-
 int play_file(char *audiofile);
 
 
@@ -43,6 +42,7 @@ char *PrepareSPcall() {
     extern int trxmode;
     extern int keyerport;
     extern char hiscall[];
+    char tmp[15];
 
     char *buf = g_malloc(80);
     buf[0] = '\0';
@@ -70,6 +70,10 @@ char *PrepareSPcall() {
 		strcat(buf, hiscall);
 		strcat(buf, " DE ");
 	    }
+	    strcat(buf, "DE ");
+            strncpy(tmp, call, strlen(call));
+	    strcat(buf, g_strchomp(tmp));
+	    strcat(buf, " ");
 	    strcat(buf, call);
 	}
     }

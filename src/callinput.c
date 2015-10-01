@@ -71,6 +71,7 @@
 #include "rtty.h"
 #include "ui_utils.h"
 #include "qtcvars.h"
+#include "write_keyer.h"
 
 #define TUNE_UP 6	/* tune up for 6 s (no more than 10) */
 
@@ -139,6 +140,8 @@ char callinput(void)
     extern int keyerport;
     extern int miniterm;
     extern int no_rst;
+    extern char wkeyerbuffer[];
+    extern int data_ready;
 
     int cury, curx;
     int i, j, ii, rc, t, x = 0, y = 0;
@@ -880,6 +883,12 @@ char callinput(void)
 
 	case 27:		// ESC
 	    {
+		if (trxmode == DIGIMODE && keyerport == GMFSK) {
+		    wkeyerbuffer[0] = 27;
+		    wkeyerbuffer[1] = '\0';
+		    data_ready = 1;
+		    write_keyer();
+		}
 		if (early_started == 0) {
 		    /* if CW not started early drop call and start anew */
 		    cleanup();

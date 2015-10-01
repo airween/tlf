@@ -76,7 +76,7 @@ void ExpandMacro(void) {
     while (strlen(buffer) > loc) {
 
 	if (loc != 0)
-	    strncat(comstr, buffer, loc);
+	strncat(comstr, buffer, loc);
 	strncat(comstr, call, (strlen(call) - 1));
 	strcat(comstr, buffer + loc + 1);
 	strcpy(buffer, comstr);
@@ -84,7 +84,6 @@ void ExpandMacro(void) {
 
 	loc = strcspn(buffer, "%");
     }
-
     loc = strcspn(buffer, "@");	/* his call */
 
     while (strlen(buffer) > loc) {
@@ -309,7 +308,7 @@ void sendbuf(void)
  */
 void sendmessage(const char *msg)
 {
-    if (strlen(msg) != 0) {
+      if (strlen(msg) != 0) {
 	g_strlcat(buffer, msg, sizeof(buffer));
 	sendbuf();
     }
