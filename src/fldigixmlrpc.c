@@ -41,8 +41,8 @@
 
 #include <syslog.h>
 
-/* #define CENTER_FREQ 2210 */
-#define CENTER_FREQ 1210
+#define CENTER_FREQ 2210
+/* #define CENTER_FREQ 1210 */
 
 extern RIG *my_rig;
 
