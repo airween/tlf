@@ -1311,6 +1311,6 @@ int send_cluster(void)
 	     "                                                                           ");
     refreshp();
     line[0] = '\0';	/* not needed */
-
+    showscore_flag = 1;
     return (0);
 }
