@@ -38,6 +38,7 @@
 #include "tlf_panel.h"
 #include "ui_utils.h"
 #include "zone_nr.h"
+#include "searchcallarray.h"
 
 
 GPtrArray *callmaster = NULL;
@@ -143,6 +144,8 @@ void searchlog(char *searchstring)
     extern int wazmult;
     extern int itumult;
     extern int country_mult;
+    extern int minitest;
+    extern struct worked_t worked[];
 
     int srch_index = 0;
     int r_index = 0;
@@ -166,6 +169,14 @@ void searchlog(char *searchstring)
     char qtccall[15];	// temp str for qtc search
     char qtcflags[6] = {' ', ' ', ' ', ' ', ' ', ' '};
     int pfxnumcntidx;
+    int found, dupe_veto, mod;
+    time_t currtime;
+    time_t toffset = time(NULL);
+    struct tm tlocal = {0};
+
+    /* get offset from UTC */
+    localtime_r(&toffset, &tlocal);
+    /* offset stored as tlocal.tm_gmtoff */
 
     struct t_qtc_store_obj *qtc_temp_ptr;
 
@@ -357,23 +368,38 @@ void searchlog(char *searchstring)
 		    || (qso_once == 1)) {
 		    if (ignoredupe == 0) {
 
-			if (mixedmode == 0) {
-			    wattrset(search_win,
-				    COLOR_PAIR(C_DUPE));
-			    dupe = ISDUPE;
-			    beep();
-			} else {
-			    if (((s_inputbuffer[3] == 'C') &&
-				 (trxmode == CWMODE)) ||
-				((s_inputbuffer[3] == 'S')
-				 && (trxmode == SSBMODE))) {
+			dupe_veto = 1;
+			if (minitest == 1) {
+			    found = searchcallarray(hiscall);
+			    if (found > -1) {
+				time(&currtime);
+				currtime = currtime - tlocal.tm_gmtoff;
+				mod = ((long)currtime)%MINITEST_PERIOD;		/* how many secods passed till last period */
+				if (worked[found].qsotime < (((long)currtime)-mod)) {
+				    dupe_veto = 0;
+				}
+			    }
+			}
+
+			if (dupe_veto == 1) {
+			    if (mixedmode == 0) {
 				wattrset(search_win,
 					COLOR_PAIR(C_DUPE));
 				dupe = ISDUPE;
 				beep();
-			    }
+			    } else {
+				if (((s_inputbuffer[3] == 'C') &&
+				    (trxmode == CWMODE)) ||
+				    ((s_inputbuffer[3] == 'S')
+				    && (trxmode == SSBMODE))) {
+				    wattrset(search_win,
+					    COLOR_PAIR(C_DUPE));
+				    dupe = ISDUPE;
+				    beep();
+				}
 
-			}	// end mixed
+			    }	// end mixed
+			}
 		    }		// end ignore
 		}
 	    }

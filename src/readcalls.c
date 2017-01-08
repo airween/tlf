@@ -67,6 +67,9 @@ int readcalls(void)
     int pfxnumcntidx;
     int pxnr;
     int excl_add_veto;
+    char date_and_time[16];
+    struct tm qsotime;
+    time_t qsotimets;
 
     FILE *fp;
 
@@ -304,6 +307,12 @@ int readcalls(void)
 	worked[l].country = countrynr;
 	g_strlcpy(worked[l].exchange, inputbuffer + 54, 12);
 	g_strchomp(worked[l].exchange);	/* strip trailing spaces */
+
+	/* calculate QSO timestamp from logline */
+	strncpy(date_and_time, inputbuffer+7, 15);
+	strptime(date_and_time, "%d-%b-%y %H:%M", &qsotime);
+	qsotimets = mktime(&qsotime);
+	worked[l].qsotime = qsotimets;
 
 	add_ok = 1;		/* look if calls are excluded */
 

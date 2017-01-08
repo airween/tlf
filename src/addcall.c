@@ -28,6 +28,7 @@
 #include <string.h>
 
 #include <glib.h>
+#include <time.h>
 
 #include "addcall.h"
 #include "addmult.h"
@@ -89,6 +90,13 @@ int addcall(void)
     int pfxnumcntidx = -1;
     int pxnr = 0;
     excl_add_veto = 0;
+    time_t currtime;
+    time_t toffset = time(NULL);
+    struct tm tlocal = {0};
+
+    /* get offset from UTC */
+    localtime_r(&toffset, &tlocal);
+    /* offset stored as tlocal.tm_gmtoff */
 
     found = searchcallarray(hiscall);
 
@@ -100,6 +108,8 @@ int addcall(void)
     } else
 	i = found;
 
+    time(&currtime);
+    worked[i].qsotime = (long)currtime-tlocal.tm_gmtoff;
     j = getctydata(hiscall);
     worked[i].country = j;
     if (strlen(comment) >= 1) {		/* remember last exchange */

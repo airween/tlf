@@ -109,6 +109,7 @@ int pacc_pa_flg = 0;
 int stewperry_flg = 0;
 int focm = 0;
 int sprint_mode = 0;
+int minitest = 0;
 
 int universal = 0;
 int addcallarea;

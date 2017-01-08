@@ -1800,6 +1800,13 @@ If you run fldigi's xmlrpc server on an different port use
 .BI 
   FLDIGI=http://localhost:7362/RPC2
 .
+.TP
+.B MINITEST
+Use this option when the contest is a minitest like contest. That means, the
+full contest intervall is divided by more short periods (usually 10 minutes),
+and you can work with any station in any period - the next QSO with same
+station isn't matter as dupe QSO. The 10 minutes period time stored in src/tlf.h.
+.
 .SH FILES
 .
 \fB@prefix@/share/@PACKAGE@/logcfg.dat\fR is a recent example of the

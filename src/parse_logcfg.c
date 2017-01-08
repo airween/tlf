@@ -68,7 +68,7 @@ void KeywordNotSupported(char *keyword);
 void ParameterNeeded(char *keyword);
 void WrongFormat(char *keyword);
 
-#define  MAX_COMMANDS 234	/* commands in list */
+#define  MAX_COMMANDS 235	/* commands in list */
 
 
 int read_logcfg(void)
@@ -299,6 +299,7 @@ int parse_logcfg(char *inputbuffer)
     extern int sprint_mode;
     extern char fldigi_url[50];
     extern unsigned char rigptt;
+    extern int minitest;
 
     char commands[MAX_COMMANDS][30] = {
 	"enable",		/* 0 */		/* deprecated */
@@ -535,7 +536,8 @@ int parse_logcfg(char *inputbuffer)
 	"QTC_RECV_LAZY",		/* 230 */
 	"SPRINTMODE",
 	"FLDIGI",
-	"RIGPTT"
+	"RIGPTT",
+	"MINITEST"
     };
 
     char **fields;
@@ -1755,7 +1757,7 @@ int parse_logcfg(char *inputbuffer)
     }
     case 224: {
 	    PARAMETER_NEEDED(teststring);
-	    if (strcmp(fields[1], "CONTINENTLIST")) {
+	    if (strcmp(g_strchomp(fields[1]), "CONTINENTLIST") == 0) {
 	        if (strlen(continent_multiplier_list[0]) == 0) {
 		    showmsg
 			("WARNING: you need to set the CONTINENTLIST parameter...");
@@ -1764,7 +1766,7 @@ int parse_logcfg(char *inputbuffer)
 		}
 		exclude_multilist_type = 1;
 	    }
-	    else if (strcmp(fields[1], "COUNTRYLIST")) {
+	    else if (strcmp(g_strchomp(fields[1]), "COUNTRYLIST") == 0) {
 	        if (strlen(countrylist[0]) == 0) {
 		    showmsg
 			("WARNING: you need to set the COUNTRYLIST parameter...");
@@ -1828,6 +1830,10 @@ int parse_logcfg(char *inputbuffer)
     }
     case 233:{
 	    rigptt |= (1 << 0);		/* bit 0 set--CAT PTT wanted (RIGPTT) */
+	    break;
+    }
+    case 234:{
+	    minitest = 1;
 	    break;
     }
     default: {
