@@ -39,7 +39,7 @@
 #include "searchcallarray.h"
 #include "tlf.h"
 #include "zone_nr.h"
-
+#include "get_time.h"
 
 int excl_add_veto;
 /* This variable helps to handle in other modules, that station is multiplier or not */
@@ -91,12 +91,9 @@ int addcall(void)
     int pxnr = 0;
     excl_add_veto = 0;
     time_t currtime;
-    time_t toffset = time(NULL);
-    struct tm tlocal = {0};
+    long gmtoff;
 
-    /* get offset from UTC */
-    localtime_r(&toffset, &tlocal);
-    /* offset stored as tlocal.tm_gmtoff */
+    gmtoff = get_utc_offset();
 
     found = searchcallarray(hiscall);
 
@@ -109,7 +106,7 @@ int addcall(void)
 	i = found;
 
     time(&currtime);
-    worked[i].qsotime = (long)currtime-tlocal.tm_gmtoff;
+    worked[i].qsotime = (long)currtime-gmtoff;
     j = getctydata(hiscall);
     worked[i].country = j;
     if (strlen(comment) >= 1) {		/* remember last exchange */
@@ -285,6 +282,11 @@ int addcall2(void)
     extern int exclude_multilist_type;
     extern char countrylist[][6];
 
+    time_t currtime;
+    long gmtoff;
+
+    gmtoff = get_utc_offset();
+
     int found = 0;
     int i, j, p, z = 0;
     int add_ok;
@@ -331,6 +333,8 @@ int addcall2(void)
     j = getctydata2(hiscall);
     g_strlcpy(cqzone, zonebuffer, 4);	//idem....
 
+    time(&currtime);
+    worked[i].qsotime = (long)currtime-gmtoff;
     worked[i].country = j;
     if (strlen(comment) >= 1) {
 //              strcpy(worked[i].exchange,comment);

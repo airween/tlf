@@ -40,3 +40,13 @@ void get_time(void)
     time_ptr =  gmtime(&now);
 }
 
+long get_utc_offset(void) {
+    time_t toffset = time(NULL);
+    struct tm tlocal = {0};
+
+    /* get offset from UTC */
+    localtime_r(&toffset, &tlocal);
+    /* offset stored as tlocal.tm_gmtoff */
+
+    return tlocal.tm_gmtoff;
+}

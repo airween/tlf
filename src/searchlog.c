@@ -39,7 +39,7 @@
 #include "ui_utils.h"
 #include "zone_nr.h"
 #include "searchcallarray.h"
-
+#include "get_time.h"
 
 GPtrArray *callmaster = NULL;
 
@@ -171,12 +171,9 @@ void searchlog(char *searchstring)
     int pfxnumcntidx;
     int found, dupe_veto, mod;
     time_t currtime;
-    time_t toffset = time(NULL);
-    struct tm tlocal = {0};
+    long gmtoff;
 
-    /* get offset from UTC */
-    localtime_r(&toffset, &tlocal);
-    /* offset stored as tlocal.tm_gmtoff */
+    gmtoff = get_utc_offset();
 
     struct t_qtc_store_obj *qtc_temp_ptr;
 
@@ -373,9 +370,9 @@ void searchlog(char *searchstring)
 			    found = searchcallarray(hiscall);
 			    if (found > -1) {
 				time(&currtime);
-				currtime = currtime - tlocal.tm_gmtoff;
+				currtime = currtime - gmtoff;
 				mod = ((long)currtime)%MINITEST_PERIOD;		/* how many secods passed till last period */
-				if (worked[found].qsotime < (((long)currtime)-mod)) {
+				if (worked[found].qsotime < (((long)currtime)-mod) && worked[found].band == inxes[bandinx]) {
 				    dupe_veto = 0;
 				}
 			    }
