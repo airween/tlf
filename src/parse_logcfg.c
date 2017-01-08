@@ -68,7 +68,7 @@ void KeywordNotSupported(char *keyword);
 void ParameterNeeded(char *keyword);
 void WrongFormat(char *keyword);
 
-#define  MAX_COMMANDS 235	/* commands in list */
+#define  MAX_COMMANDS 237	/* commands in list */
 
 
 int read_logcfg(void)
@@ -300,6 +300,8 @@ int parse_logcfg(char *inputbuffer)
     extern char fldigi_url[50];
     extern unsigned char rigptt;
     extern int minitest;
+    extern int unique_call_multi;
+    extern int unique_call_multi_perband;
 
     char commands[MAX_COMMANDS][30] = {
 	"enable",		/* 0 */		/* deprecated */
@@ -537,7 +539,9 @@ int parse_logcfg(char *inputbuffer)
 	"SPRINTMODE",
 	"FLDIGI",
 	"RIGPTT",
-	"MINITEST"
+	"MINITEST",
+	"UNIQUE_CALL_MULTI",		/* 235 */
+	"UNIQUE_CALL_MULTI_PERBAND"
     };
 
     char **fields;
@@ -1834,6 +1838,14 @@ int parse_logcfg(char *inputbuffer)
     }
     case 234:{
 	    minitest = 1;
+	    break;
+    }
+    case 235: {
+	    unique_call_multi = 1;
+	    break;
+    }
+    case 236: {
+	    unique_call_multi_perband = 1;
 	    break;
     }
     default: {

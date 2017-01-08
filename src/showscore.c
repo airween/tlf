@@ -138,6 +138,9 @@ int get_nr_of_mults()
     extern int multscore[];
     extern int bandweight_multis[NBANDS];
     extern int pfxmultab;
+    extern int unique_call_multi;
+    extern int unique_call_multi_perband;
+    extern int unique_call_nr_band[];
 
     int n;
     int totalzones;
@@ -221,6 +224,16 @@ int get_nr_of_mults()
     else if ((itumult == 1) || (wazmult == 1)) {
 	return totalzones;
     }
+    else if (unique_call_multi == 1) {
+	return nr_worked;
+    }
+    else if (unique_call_multi_perband == 1) {
+        totalmults = 0;
+        for(n=0; n<NBANDS; n++) {
+	    totalmults += unique_call_nr_band[n];
+	}
+	return totalmults;
+    }
     else
 	/* should never reach that point
 	 *
@@ -268,6 +281,9 @@ int showscore(void)
     extern int sectn_mult;
     extern int dx_arrlsections;
     extern float fixedmult;
+    extern int unique_call_multi;
+    extern int unique_call_multi_perband;
+    extern int unique_call_nr_band[];
 
     int i, l10;
     float p;
@@ -358,6 +374,14 @@ int showscore(void)
 	    mvprintw(3, START_COL, "Cty  ");
 	    for (i = 0; i < 6; i++) {
 	    	printfield(3, band_cols[i], countryscore[bi_normal[i]]);
+	    }
+	}
+
+	if (unique_call_multi_perband == 1) {
+
+	    mvprintw(3, START_COL, "Call ");
+	    for (i = 0; i < 6; i++) {
+		printfield(3, band_cols[i], unique_call_nr_band[bi_normal[i]]);
 	    }
 	}
 

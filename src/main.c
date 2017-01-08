@@ -110,6 +110,9 @@ int stewperry_flg = 0;
 int focm = 0;
 int sprint_mode = 0;
 int minitest = 0;
+int unique_call_multi = 0;          // for config
+int unique_call_multi_perband = 0;  // for config
+int unique_call_nr_band[NBANDS] = {0, 0, 0, 0, 0, 0, 0, 0, 0}; // store nr of multis
 
 int universal = 0;
 int addcallarea;

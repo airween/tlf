@@ -48,6 +48,7 @@ int readcalls(void)
     extern t_pfxnummulti pfxnummulti[];
     extern int exclude_multilist_type;
     extern char countrylist[][6];
+    extern int unique_call_nr_band[];
 
     char inputbuffer[160];
     char tmpbuf[20];
@@ -297,7 +298,6 @@ int readcalls(void)
 		break;
 	    } else
 		l = i;
-
 	}
 
 	strncpy(worked[l].call, inputbuffer + 29, 19);
@@ -313,6 +313,16 @@ int readcalls(void)
 	strptime(date_and_time, "%d-%b-%y %H:%M", &qsotime);
 	qsotimets = mktime(&qsotime);
 	worked[l].qsotime = qsotimets;
+
+	if (strncmp("CW ", inputbuffer+3, 3) == 0) {
+	    worked[i].mode = CWMODE;
+	}
+	if (strncmp("SSB", inputbuffer+3, 3) == 0) {
+	    worked[i].mode = SSBMODE;
+	}
+	if (strncmp("DIG", inputbuffer+3, 3) == 0) {
+	    worked[i].mode = DIGIMODE;
+	}
 
 	add_ok = 1;		/* look if calls are excluded */
 
@@ -383,6 +393,9 @@ int readcalls(void)
 
 	if (add_ok == 1) {
 
+	    if ((worked[l].band & inxes[bandinx]) == 0) {
+		unique_call_nr_band[bandinx]++;
+	    }
 	    worked[l].band |= inxes[bandinx];	/* mark band as worked */
 
 	    band_score[bandinx]++;	/*  qso counter  per band */

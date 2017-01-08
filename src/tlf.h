@@ -145,6 +145,7 @@ struct worked_t {
     int band; 			/*< bitmap for worked bands */
     int country; 		/*< its country number */
     long qsotime;		/*< qso's timestamp in gmtime */
+    int mode;			/*< mode of QSO */
 };
 
 

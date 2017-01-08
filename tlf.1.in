@@ -1807,6 +1807,15 @@ full contest intervall is divided by more short periods (usually 10 minutes),
 and you can work with any station in any period - the next QSO with same
 station isn't matter as dupe QSO. The 10 minutes period time stored in src/tlf.h.
 .
+.TP
+.B UNIQUE_CALL_MULTI
+This keyword usable to tell to Tlf, that multipliers is the unique callsigns.
+Note, that one callsing counts only once, no matter which bands was it. 
+.
+.TP
+.B UNIQUE_CALL_MULTI_PERBAND
+Same as \fBUNIQUE_CALL_MULTI\fR, except a callsign counts as multiplier on all band.
+.
 .SH FILES
 .
 \fB@prefix@/share/@PACKAGE@/logcfg.dat\fR is a recent example of the

@@ -372,7 +372,7 @@ void searchlog(char *searchstring)
 				time(&currtime);
 				currtime = currtime - gmtoff;
 				mod = ((long)currtime)%MINITEST_PERIOD;		/* how many secods passed till last period */
-				if (worked[found].qsotime < (((long)currtime)-mod) && worked[found].band == inxes[bandinx]) {
+				if (worked[found].qsotime < (((long)currtime)-mod) && worked[found].band & inxes[bandinx]) {
 				    dupe_veto = 0;
 				}
 			    }

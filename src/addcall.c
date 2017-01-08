@@ -83,6 +83,7 @@ int addcall(void)
     extern char continent[];
     extern int exclude_multilist_type;
     extern char countrylist[][6];
+    extern int unique_call_nr_band[];
 
     static int found = 0;
     static int i, j, z = 0;
@@ -191,6 +192,9 @@ int addcall(void)
 
     if (add_ok == 1) {
 
+	if ((worked[i].band & inxes[bandinx]) == 0) {
+		unique_call_nr_band[bandinx]++;
+	}
 	worked[i].band |= inxes[bandinx];	/* worked on this band */
 
 	switch (bandinx) {
@@ -281,6 +285,7 @@ int addcall2(void)
     extern int pfxmultab;
     extern int exclude_multilist_type;
     extern char countrylist[][6];
+    extern int unique_call_nr_band[];
 
     time_t currtime;
     long gmtoff;
@@ -402,6 +407,10 @@ int addcall2(void)
 
 	bandinx = get_band(lan_logline);
 	band_score[bandinx]++;
+	if ((worked[i].band & inxes[bandinx]) == 0) {
+		unique_call_nr_band[bandinx]++;
+	}
+	worked[i].band |= inxes[bandinx];	/* worked on this band */
 
 	if (excl_add_veto == 0) {
 
