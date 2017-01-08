@@ -71,6 +71,7 @@ int readcalls(void)
     char date_and_time[16];
     struct tm qsotime;
     time_t qsotimets;
+    int qsomode;
 
     FILE *fp;
 
@@ -87,6 +88,11 @@ int readcalls(void)
 	*worked[i].call = '\0';
 	worked[i].band = 0;
 	worked[i].country = -1;
+	for(l=0; l<3; l++) {
+	    for(n=0; n<NBANDS; n++) {
+		worked[i].qsotime[l][n] = 0;
+	    }
+	}
     }
 
     for (i = 1; i <= MAX_DATALINES - 1; i++)
@@ -308,21 +314,21 @@ int readcalls(void)
 	g_strlcpy(worked[l].exchange, inputbuffer + 54, 12);
 	g_strchomp(worked[l].exchange);	/* strip trailing spaces */
 
+	if (strncmp("CW ", inputbuffer+3, 3) == 0) {
+	    qsomode = CWMODE;
+	}
+	if (strncmp("SSB", inputbuffer+3, 3) == 0) {
+	    qsomode = SSBMODE;
+	}
+	if (strncmp("DIG", inputbuffer+3, 3) == 0) {
+	    qsomode = DIGIMODE;
+	}
+
 	/* calculate QSO timestamp from logline */
 	strncpy(date_and_time, inputbuffer+7, 15);
 	strptime(date_and_time, "%d-%b-%y %H:%M", &qsotime);
 	qsotimets = mktime(&qsotime);
-	worked[l].qsotime = qsotimets;
-
-	if (strncmp("CW ", inputbuffer+3, 3) == 0) {
-	    worked[i].mode = CWMODE;
-	}
-	if (strncmp("SSB", inputbuffer+3, 3) == 0) {
-	    worked[i].mode = SSBMODE;
-	}
-	if (strncmp("DIG", inputbuffer+3, 3) == 0) {
-	    worked[i].mode = DIGIMODE;
-	}
+	worked[l].qsotime[qsomode][bandinx] = qsotimets;
 
 	add_ok = 1;		/* look if calls are excluded */
 

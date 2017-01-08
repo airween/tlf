@@ -84,6 +84,7 @@ int addcall(void)
     extern int exclude_multilist_type;
     extern char countrylist[][6];
     extern int unique_call_nr_band[];
+    extern int trxmode;
 
     static int found = 0;
     static int i, j, z = 0;
@@ -107,7 +108,7 @@ int addcall(void)
 	i = found;
 
     time(&currtime);
-    worked[i].qsotime = (long)currtime-gmtoff;
+    worked[i].qsotime[trxmode][bandinx] = (long)currtime-gmtoff;
     j = getctydata(hiscall);
     worked[i].country = j;
     if (strlen(comment) >= 1) {		/* remember last exchange */
@@ -286,6 +287,7 @@ int addcall2(void)
     extern int exclude_multilist_type;
     extern char countrylist[][6];
     extern int unique_call_nr_band[];
+    extern int trxmode;
 
     time_t currtime;
     long gmtoff;
@@ -339,7 +341,7 @@ int addcall2(void)
     g_strlcpy(cqzone, zonebuffer, 4);	//idem....
 
     time(&currtime);
-    worked[i].qsotime = (long)currtime-gmtoff;
+    worked[i].qsotime[trxmode][bandinx] = (long)currtime-gmtoff;
     worked[i].country = j;
     if (strlen(comment) >= 1) {
 //              strcpy(worked[i].exchange,comment);
@@ -410,6 +412,8 @@ int addcall2(void)
 	if ((worked[i].band & inxes[bandinx]) == 0) {
 		unique_call_nr_band[bandinx]++;
 	}
+	worked[i].band |= inxes[bandinx];	/* worked on this band */
+
 	worked[i].band |= inxes[bandinx];	/* worked on this band */
 
 	if (excl_add_veto == 0) {
