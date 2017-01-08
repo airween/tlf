@@ -41,6 +41,7 @@
 #include "searchcallarray.h"
 #include "get_time.h"
 
+
 GPtrArray *callmaster = NULL;
 
 PANEL *search_panel;
@@ -372,7 +373,7 @@ void searchlog(char *searchstring)
 				time(&currtime);
 				currtime = currtime - gmtoff;
 				mod = ((long)currtime)%MINITEST_PERIOD;		/* how many secods passed till last period */
-				if (worked[found].qsotime < (((long)currtime)-mod) && worked[found].band == inxes[bandinx]) {
+				if (worked[found].qsotime[trxmode][bandinx] < (((long)currtime)-mod)) {
 				    dupe_veto = 0;
 				}
 			    }

@@ -144,7 +144,7 @@ struct worked_t {
     char exchange[12]; 		/*< the last exchange */
     int band; 			/*< bitmap for worked bands */
     int country; 		/*< its country number */
-    long qsotime;		/*< qso's timestamp in gmtime */
+    long qsotime[3][NBANDS];	/*< last timestamp of qso in gmtime for all modes and bands */
 };
 
 
