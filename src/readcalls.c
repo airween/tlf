@@ -27,6 +27,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#ifndef _XOPEN_SOURCE
+#define _XOPEN_SOURCE
+#endif
+#ifndef __USE_XOPEN
+#define __USE_XOPEN
+#endif
+#include <time.h>
 
 #include "addmult.h"
 #include "addpfx.h"
@@ -38,6 +45,7 @@
 #include "startmsg.h"
 #include "tlf_curses.h"
 #include "zone_nr.h"
+#include "uniquecallmulti.h"
 
 
 int readcalls(void)
@@ -48,7 +56,8 @@ int readcalls(void)
     extern t_pfxnummulti pfxnummulti[];
     extern int exclude_multilist_type;
     extern char countrylist[][6];
-    extern int unique_call_nr_band[];
+    extern int unique_call_multis[3][NBANDS];
+    extern int minitest;
 
     char inputbuffer[160];
     char tmpbuf[20];
@@ -72,6 +81,9 @@ int readcalls(void)
     struct tm qsotime;
     time_t qsotimets;
     int qsomode;
+    int newqsotime;
+    long mod;
+    int summ, sumb;
 
     FILE *fp;
 
@@ -92,6 +104,14 @@ int readcalls(void)
 	    for(n=0; n<NBANDS; n++) {
 		worked[i].qsotime[l][n] = 0;
 	    }
+	}
+	worked[i].mode[CWMODE] = 0;
+	worked[i].mode[SSBMODE] = 0;
+	worked[i].mode[DIGIMODE] = 0;
+    }
+    for(summ=0; summ<3; summ++) {
+	for(sumb=0; sumb<NBANDS; sumb++) {
+	    unique_call_multis[summ][sumb] = 0;
 	}
     }
 
@@ -311,6 +331,7 @@ int readcalls(void)
 	strtok(worked[l].call, " \r");	/* delimit first word */
 
 	worked[l].country = countrynr;
+
 	g_strlcpy(worked[l].exchange, inputbuffer + 54, 12);
 	g_strchomp(worked[l].exchange);	/* strip trailing spaces */
 
@@ -326,8 +347,26 @@ int readcalls(void)
 
 	/* calculate QSO timestamp from logline */
 	strncpy(date_and_time, inputbuffer+7, 15);
+	memset(&qsotime, 0, sizeof(struct tm));
 	strptime(date_and_time, "%d-%b-%y %H:%M", &qsotime);
 	qsotimets = mktime(&qsotime);
+
+	newqsotime = 0;
+	if (worked[l].qsotime[qsomode][bandinx] == 0) {
+	    newqsotime = 1;
+	}
+
+	if (minitest == 1) {
+	    if (worked[l].qsotime[qsomode][bandinx] > 0) {
+		mod = ((long)qsotimets)%(long)MINITEST_PERIOD;	/* how many secods passed till last period */
+		if (worked[l].qsotime[qsomode][bandinx] < (((long)qsotimets)-mod)) {
+		    newqsotime = 1;
+		}
+	    }
+	}
+	uniquecallmulti(l, qsomode, bandinx, newqsotime);
+
+	worked[l].mode[bandinx] = qsomode;
 	worked[l].qsotime[qsomode][bandinx] = qsotimets;
 
 	add_ok = 1;		/* look if calls are excluded */
@@ -399,9 +438,6 @@ int readcalls(void)
 
 	if (add_ok == 1) {
 
-	    if ((worked[l].band & inxes[bandinx]) == 0) {
-		unique_call_nr_band[bandinx]++;
-	    }
 	    worked[l].band |= inxes[bandinx];	/* mark band as worked */
 
 	    band_score[bandinx]++;	/*  qso counter  per band */

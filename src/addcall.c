@@ -40,6 +40,7 @@
 #include "tlf.h"
 #include "zone_nr.h"
 #include "get_time.h"
+#include "uniquecallmulti.h"
 
 int excl_add_veto;
 /* This variable helps to handle in other modules, that station is multiplier or not */
@@ -83,8 +84,8 @@ int addcall(void)
     extern char continent[];
     extern int exclude_multilist_type;
     extern char countrylist[][6];
-    extern int unique_call_nr_band[];
     extern int trxmode;
+    extern int minitest;
 
     static int found = 0;
     static int i, j, z = 0;
@@ -94,6 +95,8 @@ int addcall(void)
     excl_add_veto = 0;
     time_t currtime;
     long gmtoff;
+    int newqsotime;
+    long mod;
 
     gmtoff = get_utc_offset();
 
@@ -108,6 +111,19 @@ int addcall(void)
 	i = found;
 
     time(&currtime);
+    newqsotime = 0;
+    if (worked[i].qsotime[trxmode][bandinx] == 0) {
+	newqsotime = 1;
+    }
+    if (minitest == 1) {
+	if (worked[i].qsotime[trxmode][bandinx] > 0) {
+	    mod = ((long)currtime)%(long)MINITEST_PERIOD;	/* how many secods passed till last period */
+	    if (worked[i].qsotime[trxmode][bandinx] < (((long)currtime)-mod)) {
+		newqsotime = 1;
+	    }
+	}
+    }
+    uniquecallmulti(i, trxmode, bandinx, newqsotime);
     worked[i].qsotime[trxmode][bandinx] = (long)currtime-gmtoff;
     j = getctydata(hiscall);
     worked[i].country = j;
@@ -193,9 +209,6 @@ int addcall(void)
 
     if (add_ok == 1) {
 
-	if ((worked[i].band & inxes[bandinx]) == 0) {
-		unique_call_nr_band[bandinx]++;
-	}
 	worked[i].band |= inxes[bandinx];	/* worked on this band */
 
 	switch (bandinx) {
@@ -286,11 +299,13 @@ int addcall2(void)
     extern int pfxmultab;
     extern int exclude_multilist_type;
     extern char countrylist[][6];
-    extern int unique_call_nr_band[];
     extern int trxmode;
+    extern int minitest;
 
     time_t currtime;
     long gmtoff;
+    int newqsotime;
+    long mod;
 
     gmtoff = get_utc_offset();
 
@@ -341,7 +356,22 @@ int addcall2(void)
     g_strlcpy(cqzone, zonebuffer, 4);	//idem....
 
     time(&currtime);
-    worked[i].qsotime[trxmode][bandinx] = (long)currtime-gmtoff;
+    currtime = currtime-gmtoff;
+    bandinx = get_band(lan_logline);
+    newqsotime = 0;
+    if (worked[i].qsotime[trxmode][bandinx] == 0) {
+	newqsotime = 1;
+    }
+    if (minitest == 1) {
+	if (worked[i].qsotime[trxmode][bandinx] > 0) {
+	    mod = ((long)currtime)%(long)MINITEST_PERIOD;	/* how many secods passed till last period */
+	    if (worked[i].qsotime[trxmode][bandinx] < (((long)currtime)-mod)) {
+		newqsotime = 1;
+	    }
+	}
+    }
+    uniquecallmulti(i, trxmode, bandinx, newqsotime);
+    worked[i].qsotime[trxmode][bandinx] = (long)currtime;
     worked[i].country = j;
     if (strlen(comment) >= 1) {
 //              strcpy(worked[i].exchange,comment);
@@ -407,13 +437,7 @@ int addcall2(void)
 
     if (add_ok == 1) {
 
-	bandinx = get_band(lan_logline);
 	band_score[bandinx]++;
-	if ((worked[i].band & inxes[bandinx]) == 0) {
-		unique_call_nr_band[bandinx]++;
-	}
-	worked[i].band |= inxes[bandinx];	/* worked on this band */
-
 	worked[i].band |= inxes[bandinx];	/* worked on this band */
 
 	if (excl_add_veto == 0) {

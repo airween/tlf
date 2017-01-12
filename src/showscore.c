@@ -139,13 +139,13 @@ int get_nr_of_mults()
     extern int bandweight_multis[NBANDS];
     extern int pfxmultab;
     extern int unique_call_multi;
-    extern int unique_call_multi_perband;
-    extern int unique_call_nr_band[];
+    extern int unique_call_multis[3][NBANDS];
 
     int n;
     int totalzones;
     int totalcountries;
     int totalmults;
+    int summ, sumb;
 
     /* precalculate summaries */
     totalzones = 0;
@@ -224,13 +224,31 @@ int get_nr_of_mults()
     else if ((itumult == 1) || (wazmult == 1)) {
 	return totalzones;
     }
-    else if (unique_call_multi == 1) {
-	return nr_worked;
-    }
-    else if (unique_call_multi_perband == 1) {
-        totalmults = 0;
-        for(n=0; n<NBANDS; n++) {
-	    totalmults += unique_call_nr_band[n];
+    else if (unique_call_multi > 0) {
+	switch (unique_call_multi) {
+	    case UNIQUECALL_ALL:
+		totalmults = unique_call_multis[0][0];
+		break;
+	    case UNIQUECALL_BAND:
+		totalmults = 0;
+		for(sumb=0; sumb<NBANDS; sumb++) {
+		    totalmults += unique_call_multis[0][sumb];
+		}
+		break;
+	    case UNIQUECALL_MODE:
+		totalmults = 0;
+		for(sumb=0; sumb<3; sumb++) {
+		    totalmults += unique_call_multis[sumb][0];
+		}
+		break;
+	    case UNIQUECALL_BANDMODE:
+		// check the current mode and band
+		for(summ = 0; summ < 3; summ++) {
+		    for(sumb = 0; sumb < NBANDS; sumb++) {
+			totalmults += unique_call_multis[summ][sumb];
+		    }
+		}
+		break;
 	}
 	return totalmults;
     }
@@ -282,11 +300,11 @@ int showscore(void)
     extern int dx_arrlsections;
     extern float fixedmult;
     extern int unique_call_multi;
-    extern int unique_call_multi_perband;
-    extern int unique_call_nr_band[];
+    extern int unique_call_multis[3][NBANDS];
 
-    int i, l10;
+    int i, j, l10;
     float p;
+    int unique_call_multis_cnt[6];
 
     if (showscore_flag == 1) {
 
@@ -377,11 +395,28 @@ int showscore(void)
 	    }
 	}
 
-	if (unique_call_multi_perband == 1) {
-
+	if (unique_call_multi == UNIQUECALL_BAND || unique_call_multi == UNIQUECALL_BANDMODE) {
+	    for(i=0; i<6; i++) {
+		unique_call_multis_cnt[i] = 0;
+	    }
 	    mvprintw(3, START_COL, "Call ");
+	    switch(unique_call_multi) {
+		case UNIQUECALL_BAND:
+		    for(i=0; i<6; i++) {
+			unique_call_multis_cnt[i] = unique_call_multis[0][bi_normal[i]];
+		    }
+		    break;
+		case UNIQUECALL_BANDMODE:
+		    for(i=0; i<6; i++) {
+			unique_call_multis_cnt[i] = 0;
+			for(j=0; j<3; j++) {
+			    unique_call_multis_cnt[i] += unique_call_multis[j][bi_normal[i]];
+			}
+		    }
+		    break;
+	    }
 	    for (i = 0; i < 6; i++) {
-		printfield(3, band_cols[i], unique_call_nr_band[bi_normal[i]]);
+		printfield(3, band_cols[i], unique_call_multis_cnt[i]);
 	    }
 	}
 

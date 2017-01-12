@@ -1810,7 +1810,16 @@ station isn't matter as dupe QSO. The 10 minutes period time stored in src/tlf.h
 .TP
 .B UNIQUE_CALL_MULTI
 This keyword usable to tell to Tlf, that multipliers is the unique callsigns.
-Note, that one callsing counts only once, no matter which bands was it. 
+You have to pass on of these arguments: ALL, BAND, MODE, BANDMODE.
+  Example:
+  UNIQUE_CALL_MULTI=BANDMODE
+The argument tells to Tlf, how does it interpret the unique callsigns as multiplier:
+ALL means all unique call is a multiplier, no matter wich bands or mode was it.
+BAND means all unique callsign is a multiplier on all different band, but no matter the MODE.
+MODE means all unique callsign is a multiplier in all different mode, but no matter the BAND.
+BANDMODE means all unique callsigns count as multiplier, on all different modes and bands.
+Note, that if you set up the MINITEST keyword, the unique callsigns counts when the periods
+restarted.
 .
 .TP
 .B UNIQUE_CALL_MULTI_PERBAND
