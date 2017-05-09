@@ -98,7 +98,8 @@ int genqtclist(char * callsign, int nrofqtc)
 }
 
 void genqtcline(char * qtc, char * qsoline) {
-    int i, qpos;
+    int i, qpos, nr;
+    char tstring[5];
 
     /* pick out qso time hhmm */
     strncpy(qtc, qsoline+17, 2);
@@ -116,8 +117,18 @@ void genqtcline(char * qtc, char * qsoline) {
        qpos++;
     }
 
-    /* add finally 4 digit exchange */
-    strncpy(qtc+qpos, qsoline+54, 4);
+    /* add finally 3 or 4 digit exchange */
+    strncpy(tstring, qsoline+54, 4);
+    nr = atoi(tstring);
+    // 3 digit
+    if (nr < 1000) {
+        sprintf(tstring, "%03d ", nr);
+    }
+    // 4 digit
+    else {
+        sprintf(tstring, "%d", nr);
+    }
+    strncpy(qtc+qpos, tstring, strlen(tstring));
     qpos += 4;
     qtc[qpos] = '\0';
 }
