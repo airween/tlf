@@ -72,6 +72,7 @@ extern char logline_edit[5][LOGLINELEN+1];
 extern int stop_backgrnd_process;
 extern char band[9][4];
 extern struct tm *time_ptr;
+extern struct tm *time_ptr_cabrillo;
 
 extern int inxes[NBANDS]; //  = {BAND160,BAND80,BAND40,0,BAND20,0,BAND15,0,BAND10} ;
 		    // from addmult.c
@@ -116,4 +117,4 @@ extern int two_point;
 extern int three_point;
 extern int dxped;
 extern int addzone;
-
+extern int do_cabrillo;
