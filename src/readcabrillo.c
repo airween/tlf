@@ -33,6 +33,8 @@
 #include "getsummary.h"
 #include "log_to_disk.h"
 #include "startmsg.h"
+#include "addmult.h"
+#include "getexchange.h"
 
 #define MAX_CABRILLO_LEN 255
 
@@ -94,6 +96,13 @@ int set_band_from_freq(int freq) {
 	return cab_bandinx;
 }
 
+void concat_comment(char * exchstr) {
+    if (strlen(comment) > 0) {
+	strcat(comment, " ");
+    }
+    strcat(comment, exchstr);
+}
+
 /* cabrillo QSO to Tlf format
  *
  * walk through the lines which starts with QSO/X-QSO, and
@@ -114,7 +123,7 @@ void cab_qso_to_tlf(char * line, struct cabrillo_desc *cabdesc) {
     item_count = cabdesc->item_count;
     item_array = cabdesc->item_array;
     int shift = 0, pos = 0;
-    char tempstr[80], timestr[3], t_qsonrstr[5];
+    char tempstr[80], timestr[3], t_qsonrstr[5], *gridmult = "";
 
     // [UNIVERSAL]
     // QSO=FREQ,5;MODE,2;DATE,10;TIME,4;MYCALL,13;RST_S,3;EXC_S,6;HISCALL,13;RST_R,3;EXCH,6
@@ -185,20 +194,27 @@ void cab_qso_to_tlf(char * line, struct cabrillo_desc *cabdesc) {
 		break;
 	    case RST_S:
 		strncpy(my_rst, tempstr, strlen(tempstr));
+		my_rst[strlen(tempstr)] = '\0';
 		break;
 	    case RST_R:
 		strncpy(his_rst, tempstr, strlen(tempstr));
+		his_rst[strlen(tempstr)] = '\0';
 		break;
 	    case EXCH:
 		strncpy(comment, tempstr, strlen(tempstr));
+		comment[strlen(tempstr)] = '\0';
 		break;
 	    case EXC1:
+		concat_comment(tempstr);
 		break;
 	    case EXC2:
+		concat_comment(tempstr);
 		break;
 	    case EXC3:
+		concat_comment(tempstr);
 		break;
 	    case EXC4:
+		concat_comment(tempstr);
 		break;
 	    case EXC_S:
 		break;
@@ -222,6 +238,11 @@ void cab_qso_to_tlf(char * line, struct cabrillo_desc *cabdesc) {
     t_qsonum = qsonum;
     qsonum = cablinecnt;
     sprintf(qsonrstr, "%04d", cablinecnt);
+    if (serial_grid4_mult == 1) {
+	gridmult = getgrid(comment);
+	strcpy(section, gridmult);
+    }
+    checkexchange(0);
     log_to_disk(0);
     strcpy(qsonrstr, t_qsonrstr);
     qsonum = t_qsonum;
