@@ -32,7 +32,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "cabrilloutils.h"
+#include "cabrillo_utils.h"
 
 
 /* conversion table between tag name in format file and internal tag */

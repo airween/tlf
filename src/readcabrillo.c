@@ -29,7 +29,7 @@
 #include <time.h>
 #include "tlf_curses.h"
 
-#include "cabrilloutils.h"
+#include "cabrillo_utils.h"
 #include "getsummary.h"
 #include "log_to_disk.h"
 #include "startmsg.h"
