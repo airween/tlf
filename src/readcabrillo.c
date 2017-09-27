@@ -50,15 +50,13 @@ extern char qsos[MAX_QSOS][LOGLINELEN+1];// array of log lines of QSOs so far;
 extern int qsoflags_for_qtc[MAX_QSOS];	// array of flag to log lines of QSOs
 extern int nr_qsos;
 
-char spinner_syms[] = "|/-\\";
-
 /* set band from freq
  *
  * set band value based on the freq, which readed from QSO line
  *
  */
 
-int set_band_from_freq(int freq) {
+int set_band_from_freq(float freq) {
 
 	int cab_bandinx;
 	switch ((int)freq) {
@@ -205,14 +203,13 @@ void cab_qso_to_tlf(char * line, struct cabrillo_desc *cabdesc) {
     }
     for  (i = 0; i < icnt; i++) {
 	item = g_ptr_array_index( temp_array, i );
-	strncpy(tempstr, line+pos, item->len);
-	tempstr[item->len] = '\0';
+	g_strlcpy(tempstr, line+pos, item->len + 1);
 	g_strchomp(tempstr);
 	pos += item->len;
 	pos++;		// space between fields
 	switch (item->tag) {
 	    case FREQ:
-		freq = atoi(tempstr)*1.0;
+		freq = atof(tempstr);
 		t_bandinx = bandinx;
 		bandinx = set_band_from_freq(freq);
 		strcpy(qtc_line.band, band[bandinx]);
@@ -262,7 +259,7 @@ void cab_qso_to_tlf(char * line, struct cabrillo_desc *cabdesc) {
 		strcpy(comment, tempstr);
 		break;
 	    case EXC1:
-		concat_comment(tempstr);
+		strcpy(comment, tempstr);
 		break;
 	    case EXC2:
 		concat_comment(tempstr);
@@ -274,9 +271,7 @@ void cab_qso_to_tlf(char * line, struct cabrillo_desc *cabdesc) {
 		concat_comment(tempstr);
 		break;
 	    case EXC_S:
-		break;
 	    case TX:
-		break;
 	    case QTCRCALL:
 		strcpy(qtcrcall, tempstr);
 		strcpy(qtc_line.call, tempstr);
