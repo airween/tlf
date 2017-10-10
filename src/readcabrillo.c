@@ -121,7 +121,7 @@ void concat_comment(char * exchstr) {
 void cab_qso_to_tlf(char * line, struct cabrillo_desc *cabdesc) {
 
     extern float freq;
-    extern struct tm *time_ptr_cabrillo;
+    extern struct tm time_ptr_cabrillo;
     extern char call[];
 
     FILE *fpqtc;
@@ -198,9 +198,7 @@ void cab_qso_to_tlf(char * line, struct cabrillo_desc *cabdesc) {
     pos = shift;
     qtcrcall[0] = '\0';
     qtcscall[0] = '\0';
-    if (time_ptr_cabrillo == NULL) {
-	time_ptr_cabrillo = malloc(sizeof (struct tm));
-    }
+
     for  (i = 0; i < icnt; i++) {
 	item = g_ptr_array_index( temp_array, i );
 	g_strlcpy(tempstr, line+pos, item->len + 1);
@@ -230,19 +228,19 @@ void cab_qso_to_tlf(char * line, struct cabrillo_desc *cabdesc) {
 		}
 		break;
 	    case DATE:
-		strptime(tempstr, "%Y-%m-%d", time_ptr_cabrillo);
-		strftime(qtc_line.date, 60, "%d-%b-%y", time_ptr_cabrillo);
+		strptime(tempstr, "%Y-%m-%d", &time_ptr_cabrillo);
+		strftime(qtc_line.date, 60, "%d-%b-%y", &time_ptr_cabrillo);
 		break;
 	    case TIME:
 		timestr[0] = tempstr[0];
 		timestr[1] = tempstr[1];
 		timestr[2] = '\0';
-		time_ptr_cabrillo->tm_hour = atoi(timestr);
+		time_ptr_cabrillo.tm_hour = atoi(timestr);
 		timestr[0] = tempstr[2];
 		timestr[1] = tempstr[3];
 		timestr[2] = '\0';
-		time_ptr_cabrillo->tm_min = atoi(timestr);
-		sprintf(qtc_line.time, "%02d:%02d", time_ptr_cabrillo->tm_hour, time_ptr_cabrillo->tm_min);
+		time_ptr_cabrillo.tm_min = atoi(timestr);
+		sprintf(qtc_line.time, "%02d:%02d", time_ptr_cabrillo.tm_hour, time_ptr_cabrillo.tm_min);
 		break;
 	    case MYCALL:
 		break;
