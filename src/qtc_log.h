@@ -22,11 +22,13 @@
 #ifndef LOG_RECV_QTC_TO_DISK_H
 #define LOG_RECV_QTC_TO_DISK_H
 
+#include "cabrillo_utils.h"
 
+void store_qtc(char *loglineptr, int direction, char * filename);
 int log_recv_qtc_to_disk (int qtcnr);
 int log_sent_qtc_to_disk (int qtcnr);
-void store_recv_qtc (char * loglineptr);
-void store_sent_qtc (char * loglineptr);
+void store_recv_qtc (struct read_qtc_t, char * filename);
+void store_sent_qtc (struct read_qtc_t, char * filename);
 
 
 #endif /* end of include guard: LOG_RECV_QTC_TO_DISK_H */

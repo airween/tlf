@@ -36,111 +36,69 @@
 extern int trx_control;
 extern float freq;
 
-int add_to_qtcline(char *line, char *toadd, int pos) {
-    int len = strlen(toadd);
-
-    strncpy(line + pos, toadd, len);
-    return pos + len;
-}
-
-
 int log_recv_qtc_to_disk(int qsonr)
 {
-    char qtclogline[100], temp[80];
-    int qpos = 0, i, tempi;
+    int i;
+    struct read_qtc_t qtc_line;
 
     for(i=0; i<10; i++) {
 
-	if (strlen(qtcreclist.qtclines[i].time) == 4 &&
-	    strlen(qtcreclist.qtclines[i].callsign) > 0 &&
-	    strlen(qtcreclist.qtclines[i].serial) > 0) { // all fields are filled
-	    memset(qtclogline, sizeof(qtclogline)/sizeof(qtclogline[0]), ' ');
-	    qpos = 0;
+        if (strlen(qtcreclist.qtclines[i].time) == 4 &&
+            strlen(qtcreclist.qtclines[i].callsign) > 0 &&
+            strlen(qtcreclist.qtclines[i].serial) > 0) { // all fields are filled
 
-	    // QTC:  3799 PH 2003-03-23 0711 YB1AQS        001/10     DL8WPX        0330 DL6RAI        1021
-	    // QTC: 21086 RY 2001-11-10 0759 HA3LI           1/10     YB1AQS        0003 KB3TS          003
+            strcpy(qtc_line.band, band[bandinx]);
+            if (trxmode == CWMODE) {
+                strcpy(qtc_line.mode, "CW ");
+            }
+            else if (trxmode == SSBMODE) {
+                strcpy(qtc_line.mode, "PH ");
+            }
+            else {
+                strcpy(qtc_line.mode, "DIG");
+            }
 
-	    sprintf(temp, "%3s", band[bandinx]);
-	    if (trxmode == CWMODE) {
-		strcat(temp, "CW  ");
-	    }
-	    else if (trxmode == SSBMODE) {
-		strcat(temp, "SSB ");
-	    }
-	    else {
-		strcat(temp, "DIG ");
-	    }
-	    qpos = add_to_qtcline(qtclogline, temp, qpos);
+            strncpy(qtc_line.date, qtcreclist.qtclines[i].receivedtime, 9);
+            qtc_line.date[9] = '\0';
+            strncpy(qtc_line.time, qtcreclist.qtclines[i].receivedtime+10, 5);
+            qtc_line.time[5] = '\0';
 
-	    sprintf(temp, "%04d", qsonr);
-	    qpos = add_to_qtcline(qtclogline, temp, qpos);
+            qtc_line.qsonr = qsonr;
 
-	    sprintf(temp, " %s ", qtcreclist.qtclines[i].receivedtime);
-	    qpos = add_to_qtcline(qtclogline, temp, qpos);
+            strcpy(qtc_line.call, qtcreclist.callsign);
 
-	    if (lan_active == 1) {
-		qtclogline[qpos++] = thisnode;	// set node ID...
-	    } else {
-		qtclogline[qpos++] = ' ';
-	    }
-	    qtclogline[qpos++] = ' ';
+            qtc_line.qtchead_serial = qtcreclist.serial;
+            qtc_line.qtchead_count = qtcreclist.count;
+            strcpy(qtc_line.qtc_time, qtcreclist.qtclines[i].time);
+            qtc_line.qtc_time[4] = '\0';
+            strcpy(qtc_line.qtc_call, qtcreclist.qtclines[i].callsign);
+            qtc_line.qtc_call[strlen(qtcreclist.qtclines[i].callsign)] = '\0';
+            qtc_line.qtc_serial = atoi(qtcreclist.qtclines[i].serial);
 
-	    sprintf(temp, "%-14s", qtcreclist.callsign);
-	    qpos = add_to_qtcline(qtclogline, temp, qpos);
+            if (trx_control == 1) {
+                qtc_line.freq = freq;
+            }
+            else {
+                qtc_line.freq = 0;
+            }
 
-	    sprintf(temp, " %04d", qtcreclist.serial);
-	    qpos = add_to_qtcline(qtclogline, temp, qpos);
+            store_recv_qtc(qtc_line, QTC_RECV_LOG);
 
-	    sprintf(temp, " %04d", qtcreclist.count);
-	    qpos = add_to_qtcline(qtclogline, temp, qpos);
-
-	    sprintf(temp, " %s", qtcreclist.qtclines[i].time);
-	    qpos = add_to_qtcline(qtclogline, temp, qpos);
-
-	    sprintf(temp, " %-14s", qtcreclist.qtclines[i].callsign);
-	    qpos = add_to_qtcline(qtclogline, temp, qpos);
-
-	    tempi = atoi(qtcreclist.qtclines[i].serial);
-	    if(tempi < 1000) {
-		sprintf(temp, "  %03d    ", tempi);
-	    }
-	    else {
-		sprintf(temp, " %04d    ", tempi);
-	    }
-	    qpos = add_to_qtcline(qtclogline, temp, qpos);
-
-	    if (trx_control == 1) {
-		snprintf(temp, 8, "%7.1f", freq);
-	    }
-	    else {
-		snprintf(temp, 8, "      *");
-	    }
-	    qpos = add_to_qtcline(qtclogline, temp, qpos);
-
-	    qtclogline[qpos] = '\n';
-	    qtclogline[qpos + 1] = '\0';
-
-	    store_recv_qtc(qtclogline);
-
-	    // send qtc to other nodes......
-	    if (lan_active == 1) {
-	      send_lan_message(QTCRENTRY, qtclogline);
-	    }
-	}
+        }
     }
 
     /* clear all line infos */
     for(i=0; i<10; i++) {
-	qtcreclist.qtclines[i].time[0] = '\0';
-	qtcreclist.qtclines[i].callsign[0] = '\0';
-	qtcreclist.qtclines[i].serial[0] = '\0';
-	qtcreclist.qtclines[i].status = 0;
-	qtcreclist.qtclines[i].confirmed = 0;
-	qtcreclist.qtclines[i].receivedtime[0] = '\0';
+        qtcreclist.qtclines[i].time[0] = '\0';
+        qtcreclist.qtclines[i].callsign[0] = '\0';
+        qtcreclist.qtclines[i].serial[0] = '\0';
+        qtcreclist.qtclines[i].status = 0;
+        qtcreclist.qtclines[i].confirmed = 0;
+        qtcreclist.qtclines[i].receivedtime[0] = '\0';
     }
     for(i=0; i<QTC_RY_LINE_NR; i++) {
-	qtc_ry_lines[i].content[0] = '\0';
-	qtc_ry_lines[i].attr = 0;
+        qtc_ry_lines[i].content[0] = '\0';
+        qtc_ry_lines[i].attr = 0;
     }
     qtc_ry_currline = 0;
     qtc_ry_copied = 0;
@@ -158,97 +116,68 @@ int log_recv_qtc_to_disk(int qsonr)
 
 int log_sent_qtc_to_disk(int qsonr)
 {
-    char qtclogline[100], temp[80];
-    int qpos = 0, i, l;
+    int i;
+    char * tempstrp;
+    struct read_qtc_t qtc_line;
 
     for(i=0; i<10; i++) {
-	if (qtclist.qtclines[i].saved == 0 && qtclist.qtclines[i].flag == 1 && qtclist.qtclines[i].sent == 1) { // not saved and marked for sent
+        if (qtclist.qtclines[i].saved == 0 && qtclist.qtclines[i].flag == 1 && qtclist.qtclines[i].sent == 1) { // not saved and marked for sent
 
-	    memset(qtclogline, sizeof(qtclogline)/sizeof(qtclogline[0]), ' ');
-	    qpos = 0;
-
-	    // QTC:  3799 PH 2003-03-23 0711 YB1AQS        001/10     DL8WPX        0330 DL6RAI        1021
-	    // QTC: 21086 RY 2001-11-10 0759 HA3LI           1/10     YB1AQS        0003 KB3TS          003
-	    // QTC: 14000 RY 2016-11-14 1219 W1AW            1/9      HA2OS         1040 W2AW          1002
-	    // QTC: 14000 RY 2016-11-14 1219 W1AW            1/9      HA2OS         1040 W3AW           003
-
-
-	    sprintf(temp, "%3s", band[bandinx]);
-	    if (trxmode == CWMODE) {
-		strcat(temp, "CW  ");
-	    }
-	    else if (trxmode == SSBMODE) {
-		strcat(temp, "SSB ");
-	    }
-	    else {
-		strcat(temp, "DIG ");
-	    }
-	    qpos = add_to_qtcline(qtclogline, temp, qpos);
-
-	    sprintf(temp, "%04d", qsonr);
-	    qpos = add_to_qtcline(qtclogline, temp, qpos);
-
-	    sprintf(temp, " %04d", qtclist.qtclines[i].qsoline+1);
-	    qpos = add_to_qtcline(qtclogline, temp, qpos);
-
-	    sprintf(temp, " %s ", qtclist.qtclines[i].senttime);
-	    qpos = add_to_qtcline(qtclogline, temp, qpos);
-
-	    if (lan_active == 1) {
-		qtclogline[qpos++] = thisnode;	// set node ID...
-	    } else {
-		qtclogline[qpos++] = ' ';
-	    }
-	    qtclogline[qpos++] = ' ';
-
-	    sprintf(temp, "%-14s", qtclist.callsign);
-	    qpos = add_to_qtcline(qtclogline, temp, qpos);
-
-	    sprintf(temp, " %04d", qtclist.serial);
-	    qpos = add_to_qtcline(qtclogline, temp, qpos);
-
-	    sprintf(temp, " %04d ", qtclist.count);
-	    qpos = add_to_qtcline(qtclogline, temp, qpos);
-	    // check and fill the QTC to 24 chars, eg:
-	    // HHMM CALL            1
-	    // 012345678901234567890123
-            l = strlen(qtclist.qtclines[i].qtc);
-            if (l < 24) {
-                qtclist.qtclines[i].qtc[l] = ' ';
-                qtclist.qtclines[i].qtc[l+1] = '\0';
+            strcpy(qtc_line.band, band[bandinx]);
+            if (trxmode == CWMODE) {
+                strcpy(qtc_line.mode, "CW ");
+            }
+            else if (trxmode == SSBMODE) {
+                strcpy(qtc_line.mode, "PH ");
+            }
+            else {
+                strcpy(qtc_line.mode, "DIG");
             }
 
-	    strcpy(qtclogline+qpos, qtclist.qtclines[i].qtc);
-	    qpos+=strlen(qtclist.qtclines[i].qtc);
+            strncpy(qtc_line.date, qtclist.qtclines[i].senttime, 9);
+            qtc_line.date[9] = '\0';
+            strncpy(qtc_line.time, qtclist.qtclines[i].senttime+10, 5);
+            qtc_line.time[5] = '\0';
 
-	    qpos = add_to_qtcline(qtclogline, "    ", qpos);
+            qtc_line.qsonr = qsonr;
 
-	    if (trx_control == 1) {
-		snprintf(temp, 8, "%7.1f", freq);
-	    }
-	    else {
-		snprintf(temp, 8, "      *");
-	    }
-	    qpos = add_to_qtcline(qtclogline, temp, qpos);
+            strcpy(qtc_line.call, qtclist.callsign);
 
-	    qtclogline[qpos] = '\n';
-	    qtclogline[qpos + 1] = '\0';
+            qtc_line.qtchead_serial = qtclist.serial;
+            qtc_line.qtchead_count = qtclist.count;
 
-	    store_sent_qtc(qtclogline);
+            strcpy(qtc_line.qtcstr, qtclist.qtclines[i].qtc);
+            tempstrp = strtok(qtc_line.qtcstr, " ");
+            strcpy(qtc_line.qtc_time, tempstrp);
 
-	    // send qtc to other nodes......
-	    if (lan_active == 1) {
-	      send_lan_message(QTCSENTRY, qtclogline);
-	    }
-	}
+            tempstrp = strtok(NULL, " ");
+            g_strchomp(tempstrp);
+            strcpy(qtc_line.qtc_call, tempstrp);
+
+            tempstrp = strtok(NULL, " ");
+            g_strchomp(tempstrp);
+            qtc_line.qtc_serial = atoi(tempstrp);
+
+            qtc_line.callpos = qtclist.qtclines[i].qsoline+1;
+
+            if (trx_control == 1) {
+                qtc_line.freq = freq;
+            }
+            else {
+                qtc_line.freq = 0;
+            }
+
+            store_sent_qtc(qtc_line, QTC_SENT_LOG);
+
+        }
     }
 
     for(i=0; i<10; i++) {
-	qtclist.qtclines[i].qtc[0] = '\0';
-	qtclist.qtclines[i].flag = 0;
-	qtclist.qtclines[i].saved = 0;
-	qtclist.qtclines[i].sent = 0;
-	qtclist.qtclines[i].senttime[0] = '\0';
+        qtclist.qtclines[i].qtc[0] = '\0';
+        qtclist.qtclines[i].flag = 0;
+        qtclist.qtclines[i].saved = 0;
+        qtclist.qtclines[i].sent = 0;
+        qtclist.qtclines[i].senttime[0] = '\0';
     }
 
     qtclist.count = 0;
@@ -260,20 +189,12 @@ int log_sent_qtc_to_disk(int qsonr)
 
 
 /* common code to store sent or received QTC's */
-void store_qtc(char *loglineptr, int direction)
+void store_qtc(char *loglineptr, int direction, char * filename)
 {
 	FILE *fp;
 	char callsign[15];
-	char filename[80];
 	char temps[15];
 	int tempi;
-
-	if (direction == SEND)
-	    strcpy(filename, QTC_SENT_LOG);
-	else if (direction == RECV)
-	    strcpy(filename, QTC_RECV_LOG);
-	else
-	    return;
 
 	if  ( (fp = fopen(filename, "a"))  == NULL){
 		fprintf(stdout,  "Error opening file: %s\n", filename);
@@ -308,14 +229,47 @@ void store_qtc(char *loglineptr, int direction)
 	qtc_inc(callsign, direction);
 }
 
-void store_sent_qtc(char *loglineptr)
+void store_sent_qtc(struct read_qtc_t qtc_line, char * fname)
 {
-	store_qtc(loglineptr, SEND);
+
+        char nodemark = ' ';
+        char qtclogline[120];
+
+        if (lan_active == 1) {
+            nodemark = thisnode;
+        }
+
+        memset(qtclogline, '\0', 120);
+        sprintf(qtclogline, "%s%s %04d %04d %s %s %c %-14s %04d %04d %s %-14s %03d    %7.1f\n", qtc_line.band, qtc_line.mode, qtc_line.qsonr,
+            qtc_line.callpos, qtc_line.date, qtc_line.time, nodemark, qtc_line.call, qtc_line.qtchead_serial, qtc_line.qtchead_count,
+            qtc_line.qtc_time, qtc_line.qtc_call, qtc_line.qtc_serial, qtc_line.freq);
+        store_qtc(qtclogline, SEND, fname);
+
+        // send qtc to other nodes......
+        if (lan_active == 1) {
+            send_lan_message(QTCSENTRY, qtclogline);
+        }
 }
 
-void store_recv_qtc(char *loglineptr)
+void store_recv_qtc(struct read_qtc_t qtc_line, char * fname)
 {
-	store_qtc(loglineptr, RECV);
+        char nodemark = ' ';
+        char qtclogline[100];
+
+        if (lan_active == 1) {
+            nodemark = thisnode;	// set node ID...
+        }
+
+        memset(qtclogline, '\0', 100);
+        sprintf(qtclogline, "%s%s %04d %s %s %c %-14s %04d %04d %s %-15s %03d    %7.1f\n", qtc_line.band, qtc_line.mode, qtc_line.qsonr,
+                qtc_line.date, qtc_line.time, nodemark, qtc_line.call, qtc_line.qtchead_serial, qtc_line.qtchead_count,
+                qtc_line.qtc_time, qtc_line.qtc_call, qtc_line.qtc_serial, qtc_line.freq);
+        store_qtc(qtclogline, RECV, fname);
+
+        // send qtc to other nodes......
+        if (lan_active == 1) {
+            send_lan_message(QTCRENTRY, qtclogline);
+        }
 }
 
 

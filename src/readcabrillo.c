@@ -36,6 +36,7 @@
 #include "addmult.h"
 #include "getexchange.h"
 #include "globalvars.h"
+#include "qtc_log.h"
 
 #define MAX_CABRILLO_LEN 255
 
@@ -123,9 +124,6 @@ void cab_qso_to_tlf(char * line, struct cabrillo_desc *cabdesc) {
     extern float freq;
     extern struct tm time_ptr_cabrillo;
     extern char call[];
-
-    FILE *fpqtc;
-    char fpqtcname[25];
 
     struct line_item *item;
     int i, icnt, t_qsonum, t_bandinx;
@@ -324,10 +322,8 @@ void cab_qso_to_tlf(char * line, struct cabrillo_desc *cabdesc) {
     }
     else if (linetype == LOGPREF_QTC) {
         if (strcmp(qtcrcall, call) == 0) {  // RECV
-	    strcpy(fpqtcname, qtcrecv_logfile_import);
-	    sprintf(qtc_line.logline, "%s%s %04d %s %s   %-14s %04d %04d %s %-15s %03d    %7.1f\n", qtc_line.band, qtc_line.mode, cablinecnt,
-		qtc_line.date, qtc_line.time, qtc_line.call, qtc_line.qtchead_serial, qtc_line.qtchead_count,
-		qtc_line.qtc_time, qtc_line.qtc_call, qtc_line.qtc_serial, qtc_line.freq);
+            qtc_line.qsonr = cablinecnt;
+            store_recv_qtc(qtc_line, qtcrecv_logfile_import);
 	}
 	else { // SENT
 
@@ -366,7 +362,7 @@ void cab_qso_to_tlf(char * line, struct cabrillo_desc *cabdesc) {
 
 		// increment list pos.
 		qtc_curr_call_nr++;
-	      
+
 	    }
 	    // end search
 	    if (found_empty == 0 && found_call > 0) {
@@ -381,16 +377,12 @@ void cab_qso_to_tlf(char * line, struct cabrillo_desc *cabdesc) {
 		qtc_curr_call_nr = qtc_last_call_nr;
 	    }
 
-	    strcpy(fpqtcname, qtcsend_logfile_import);
-	    sprintf(qtc_line.logline, "%s%s %04d %04d %s %s   %-14s %04d %04d %s %-14s %03d    %7.1f\n", qtc_line.band, qtc_line.mode, cablinecnt,
-		found_call, qtc_line.date, qtc_line.time, qtcrcall, qtc_line.qtchead_serial, qtc_line.qtchead_count,
-		qtc_line.qtc_time, qtc_line.qtc_call, qtc_line.qtc_serial, qtc_line.freq);
+	    strcpy(qtc_line.call, qtcrcall);
+	    qtc_line.callpos = found_call;
+            qtc_line.qsonr = cablinecnt;
+            store_sent_qtc(qtc_line, qtcsend_logfile_import);
 	}
-	fpqtc = fopen(fpqtcname, "a");
 
-	fputs(qtc_line.logline, fpqtc);
-
-	fclose(fpqtc);
     }
     bandinx = t_bandinx;
 }
