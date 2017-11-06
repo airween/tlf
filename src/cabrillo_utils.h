@@ -44,6 +44,7 @@ struct qso_t {
 
 /* represents different parts of a qtc logline */
 struct read_qtc_t {
+    int direction;      // represents the direction of QTC: SEND or RECV
     char logline[120];  // represents the final log, if require
     char band[4];       // band, eg "160"
     char mode[4];       // mode, eg "DIG"

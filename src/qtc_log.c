@@ -47,6 +47,7 @@ int log_recv_qtc_to_disk(int qsonr)
             strlen(qtcreclist.qtclines[i].callsign) > 0 &&
             strlen(qtcreclist.qtclines[i].serial) > 0) { // all fields are filled
 
+            qtc_line.direction = RECV;
             strcpy(qtc_line.band, band[bandinx]);
             if (trxmode == CWMODE) {
                 strcpy(qtc_line.mode, "CW ");
@@ -82,7 +83,7 @@ int log_recv_qtc_to_disk(int qsonr)
                 qtc_line.freq = 0;
             }
 
-            store_recv_qtc(qtc_line, QTC_RECV_LOG);
+            make_qtc_logline(qtc_line, QTC_RECV_LOG);
 
         }
     }
@@ -123,6 +124,7 @@ int log_sent_qtc_to_disk(int qsonr)
     for(i=0; i<10; i++) {
         if (qtclist.qtclines[i].saved == 0 && qtclist.qtclines[i].flag == 1 && qtclist.qtclines[i].sent == 1) { // not saved and marked for sent
 
+            qtc_line.direction = SEND;
             strcpy(qtc_line.band, band[bandinx]);
             if (trxmode == CWMODE) {
                 strcpy(qtc_line.mode, "CW ");
@@ -167,7 +169,7 @@ int log_sent_qtc_to_disk(int qsonr)
                 qtc_line.freq = 0;
             }
 
-            store_sent_qtc(qtc_line, QTC_SENT_LOG);
+            make_qtc_logline(qtc_line, QTC_SENT_LOG);
 
         }
     }
@@ -229,8 +231,7 @@ void store_qtc(char *loglineptr, int direction, char * filename)
 	qtc_inc(callsign, direction);
 }
 
-void store_sent_qtc(struct read_qtc_t qtc_line, char * fname)
-{
+void make_qtc_logline(struct read_qtc_t qtc_line, char * fname) {
 
         char nodemark = ' ';
         char qtclogline[120];
@@ -238,37 +239,24 @@ void store_sent_qtc(struct read_qtc_t qtc_line, char * fname)
         if (lan_active == 1) {
             nodemark = thisnode;
         }
-
         memset(qtclogline, '\0', 120);
-        sprintf(qtclogline, "%s%s %04d %04d %s %s %c %-14s %04d %04d %s %-14s %03d    %7.1f\n", qtc_line.band, qtc_line.mode, qtc_line.qsonr,
-            qtc_line.callpos, qtc_line.date, qtc_line.time, nodemark, qtc_line.call, qtc_line.qtchead_serial, qtc_line.qtchead_count,
-            qtc_line.qtc_time, qtc_line.qtc_call, qtc_line.qtc_serial, qtc_line.freq);
-        store_qtc(qtclogline, SEND, fname);
-
-        // send qtc to other nodes......
-        if (lan_active == 1) {
-            send_lan_message(QTCSENTRY, qtclogline);
-        }
-}
-
-void store_recv_qtc(struct read_qtc_t qtc_line, char * fname)
-{
-        char nodemark = ' ';
-        char qtclogline[100];
-
-        if (lan_active == 1) {
-            nodemark = thisnode;	// set node ID...
-        }
-
-        memset(qtclogline, '\0', 100);
-        sprintf(qtclogline, "%s%s %04d %s %s %c %-14s %04d %04d %s %-15s %03d    %7.1f\n", qtc_line.band, qtc_line.mode, qtc_line.qsonr,
+        if (qtc_line.direction == RECV) {
+            sprintf(qtclogline, "%s%s %04d %s %s %c %-14s %04d %04d %s %-15s %03d    %7.1f\n", qtc_line.band, qtc_line.mode, qtc_line.qsonr,
                 qtc_line.date, qtc_line.time, nodemark, qtc_line.call, qtc_line.qtchead_serial, qtc_line.qtchead_count,
                 qtc_line.qtc_time, qtc_line.qtc_call, qtc_line.qtc_serial, qtc_line.freq);
-        store_qtc(qtclogline, RECV, fname);
-
-        // send qtc to other nodes......
-        if (lan_active == 1) {
-            send_lan_message(QTCRENTRY, qtclogline);
+            store_qtc(qtclogline, qtc_line.direction, fname);
+            if (lan_active == 1) {
+                send_lan_message(QTCRENTRY, qtclogline);
+            }
+        }
+        if (qtc_line.direction == SEND) {
+            sprintf(qtclogline, "%s%s %04d %04d %s %s %c %-14s %04d %04d %s %-14s %03d    %7.1f\n", qtc_line.band, qtc_line.mode, qtc_line.qsonr,
+                qtc_line.callpos, qtc_line.date, qtc_line.time, nodemark, qtc_line.call, qtc_line.qtchead_serial, qtc_line.qtchead_count,
+                qtc_line.qtc_time, qtc_line.qtc_call, qtc_line.qtc_serial, qtc_line.freq);
+            store_qtc(qtclogline, qtc_line.direction, fname);
+            if (lan_active == 1) {
+                send_lan_message(QTCSENTRY, qtclogline);
+            }
         }
 }
 

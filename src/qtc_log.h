@@ -27,8 +27,6 @@
 void store_qtc(char *loglineptr, int direction, char * filename);
 int log_recv_qtc_to_disk (int qtcnr);
 int log_sent_qtc_to_disk (int qtcnr);
-void store_recv_qtc (struct read_qtc_t, char * filename);
-void store_sent_qtc (struct read_qtc_t, char * filename);
-
+void make_qtc_logline(struct read_qtc_t qtc_line, char * fname);
 
 #endif /* end of include guard: LOG_RECV_QTC_TO_DISK_H */

@@ -322,13 +322,14 @@ void cab_qso_to_tlf(char * line, struct cabrillo_desc *cabdesc) {
     }
     else if (linetype == LOGPREF_QTC) {
         if (strcmp(qtcrcall, call) == 0) {  // RECV
+            qtc_line.direction = RECV;
             qtc_line.qsonr = cablinecnt;
-            store_recv_qtc(qtc_line, qtcrecv_logfile_import);
+            make_qtc_logline(qtc_line, qtcrecv_logfile_import);
 	}
 	else { // SENT
 
+	    qtc_line.direction = SEND;
 	    // search the sent callsign in list of QSO's
-
 	    found_call = 0;	// indicates that the callsign found
 	    found_empty = 0;	// indicates that there is the "hole" in the list
 				// some reason, eg. own call
@@ -380,7 +381,7 @@ void cab_qso_to_tlf(char * line, struct cabrillo_desc *cabdesc) {
 	    strcpy(qtc_line.call, qtcrcall);
 	    qtc_line.callpos = found_call;
             qtc_line.qsonr = cablinecnt;
-            store_sent_qtc(qtc_line, qtcsend_logfile_import);
+            make_qtc_logline(qtc_line, qtcsend_logfile_import);
 	}
 
     }
