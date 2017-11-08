@@ -84,12 +84,24 @@ modem.set_carrier    i:i  - set carrier of modem
  text.get_rx_length  i:n  - get length of content of RX window
  text.get_rx         6:ii - (bytes:int|int) - get part content of RX window
 			    [start:length]
+ undocumented functions
+ ======================
+   tx.get_data       6:n  - (bytes:) - get content of TX window since last query
 */
 
 #ifdef HAVE_LIBXMLRPC
 xmlrpc_env env;
 xmlrpc_server_info * serverInfoP = NULL;
 #endif
+
+int fldigi_ptt;
+
+void xmlrpc_res_init(xmlrpc_res * res) {
+#ifdef HAVE_LIBXMLRPC
+    res->stringval = NULL;
+    res->byteval = NULL;
+#endif
+}
 
 
 int fldigi_xmlrpc_init() {
@@ -363,6 +375,32 @@ int fldigi_get_rx_text(char * line) {
 
 }
 
+int fldigi_get_tx_text(char * line) {
+#ifdef HAVE_LIBXMLRPC
+    int rc;
+    xmlrpc_res result;
+    xmlrpc_env env;
+    line[0] = '\0';
+
+    xmlrpc_res_init(&result);
+
+    rc = fldigi_xmlrpc_query(&result, &env, "tx.get_data", "");
+    if (rc != 0) {
+        return 0;
+    }
+    else {
+        if (result.intval > 0 && result.byteval != NULL) {
+            line[0] = '\0';
+            memcpy(line, result.byteval, result.intval);
+            line[result.intval] = '\0';
+        }
+        if (result.byteval != NULL) {
+            free((void *)result.byteval);
+        }
+    }
+#endif
+    return 0;
+}
 
 int fldigi_xmlrpc_get_carrier() {
 
@@ -450,6 +488,34 @@ int fldigi_get_shift_freq() {
 #else
         return 0;
 #endif
+}
+
+int fldigi_get_rxtx_state() {
+#ifdef HAVE_LIBXMLRPC
+    int rc;
+    xmlrpc_res result;
+    xmlrpc_env env;
+
+    xmlrpc_res_init(&result);
+
+    rc = fldigi_xmlrpc_query(&result, &env, "main.get_trx_state", "");
+    if (rc != 0) {
+        return 0;
+    }
+    else {
+        if (strcmp(result.stringval, "TX") == 0) {
+            fldigi_ptt = FLDIGI_TX;
+        }
+        else {
+            fldigi_ptt = FLDIGI_RX;
+        }
+        free((void *)result.stringval);
+        if (result.byteval != NULL) {
+            free((void *)result.byteval);
+        }
+    }
+#endif
+    return 0;
 }
 
 void xmlrpc_showinfo() {

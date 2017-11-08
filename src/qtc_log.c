@@ -221,7 +221,7 @@ int log_sent_qtc_to_disk(int qsonr)
 	    strcpy(qtclogline+qpos, qtclist.qtclines[i].qtc);
 	    qpos+=strlen(qtclist.qtclines[i].qtc);
 
-	    qpos = add_to_qtcline(qtclogline, "    ", qpos);
+	    qpos = add_to_qtcline(qtclogline, "   ", qpos);
 
 	    if (trx_control == 1) {
 		snprintf(temp, 8, "%7.1f", freq);

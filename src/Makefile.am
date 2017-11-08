@@ -25,7 +25,7 @@ tlf_SOURCES = \
 	qrb.c qsonr_to_str.c qtc_log.c qtcwin.c qtcutil.c \
 	readcalls.c readqtccalls.c readctydata.c recall_exchange.c rules.c \
 	score.c scroll_log.c  searchcallarray.c searchlog.c sendbuf.c \
-	sendqrg.c sendspcall.c set_tone.c setcontest.c \
+	sendqrg.c sendspcall.c serialmodem.c set_tone.c setcontest.c \
 	setparameters.c show_help.c showinfo.c showpxmap.c \
 	showscore.c showzones.c sockserv.c speedupndown.c   \
 	stoptx.c store_qso.c sunup.c splitscreen.c startmsg.c\
@@ -61,7 +61,7 @@ noinst_HEADERS = \
 	readcalls.h readqtccalls.h readctydata.h recall_exchange.h \
 	rules.h \
 	score.h scroll_log.h searchcallarray.h searchlog.h sendbuf.h \
-	sendqrg.h sendspcall.h set_tone.h setcontest.h \
+	sendqrg.h sendspcall.h serialmodem.h set_tone.h setcontest.h \
 	setparameters.h show_help.h showinfo.h showpxmap.h showscore.h \
 	showzones.h sockserv.h speedupndown.h  \
 	splitscreen.h startmsg.h stoptx.h store_qso.h sunup.h \
