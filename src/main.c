@@ -59,6 +59,7 @@
 #include "tlf_panel.h"
 #include "ui_utils.h"
 #include "readcabrillo.h"
+#include "serialmodem.h"
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -371,6 +372,8 @@ int rig_comm_success = 0;
 
 /*----------------------------------fldigi---------------------------------*/
 char fldigi_url[50] = "http://localhost:7362/RPC2";
+char fldigi_modem[20] = "";
+int fldigi_fsk = 0;
 
 /*---------------------------------simulator-------------------------------*/
 int simulator = 0;
@@ -892,6 +895,9 @@ void tlf_cleanup()
 #ifdef HAVE_LIBXMLRPC
     if (digikeyer == FLDIGI) {
 	fldigi_xmlrpc_cleanup();
+    }
+    if (fldigi_fsk == 1) {
+	serial_close();
     }
 #endif
 

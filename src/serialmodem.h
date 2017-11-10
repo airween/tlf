@@ -1,7 +1,6 @@
 /*
  * Tlf - contest logging program for amateur radio operators
- * Copyright (C) 2001-2002-2003 Rein Couperus <pa0rct@amsat.org>
- *               2014           Ervin Hegedus <airween@gmail.com>
+ * Copyright (C) 2017           Ervin Hegedus <airween@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,26 +15,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * serialmodem.h
+ * fltiny serial modem interface header
  */
 
+#ifndef SERIALMODEM_H
+#define SERIALMODEM_H 1
 
-#ifndef FLDIGIXMLRPC_H
-#define FLDIGIXMLRPC_H
+void serial_read();
+int serial_init();
+int serial_write(char c);
+int serial_close();
 
-#define FLDIGI_TX   1
-#define FLDIGI_RX   2
-
-int fldigi_xmlrpc_init();
-int fldigi_xmlrpc_cleanup();
-
-int fldigi_xmlrpc_get_carrier(void);
-int fldigi_get_carrier();
-int fldigi_get_shift_freq();
-int fldigi_get_rx_text(char * line);
-int fldigi_get_tx_text(char * line);
-int fldigi_send_text(char * line);
-void fldigi_to_rx();
-int fldigi_get_rxtx_state();
-void xmlrpc_showinfo();
-
-#endif /* end of include guard: FLDIGIXMLRPC_H */
+#endif /* end of include guard: SERIALMODEM_H */

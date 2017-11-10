@@ -41,6 +41,7 @@
 #include "tlf_curses.h"
 #include "write_keyer.h"
 #include "qtcvars.h"
+#include "serialmodem.h"
 
 
 extern int stop_backgrnd_process;
@@ -75,11 +76,15 @@ void *background_process(void *ptr)
 
     extern int landebug;
     extern struct tm *time_ptr;
+    extern int fldigi_ptt;
+    extern int fldigi_fsk;
 
-    static int i, t;
+    static int i, t, f;
     static char prmessage[256];
     static int lantimesync = 0;
     static int fldigi_rpc_cnt = 0;
+    static int fldigi_ptt_last = FLDIGI_RX;
+    char fldigi_tx_line[1024] = "";
 
     int n;
 
@@ -119,6 +124,60 @@ void *background_process(void *ptr)
 		fldigi_xmlrpc_get_carrier();
 	    }
 	    fldigi_rpc_cnt = 1 - fldigi_rpc_cnt;
+	    if (digikeyer == FLDIGI && fldigi_fsk == 1) {
+
+	        if (fldigi_get_rxtx_state() != 0) {
+                    mvprintw(24, 0,
+                        "Warning: Fldigi error!");
+                    refreshp();
+                    sleep(5);
+                }
+                if (fldigi_ptt == FLDIGI_TX) {
+                    if (fldigi_ptt_last == FLDIGI_RX) {
+                        if (serial_write('[') <= 0) {
+                            mvprintw(24, 0,
+                                "Warning: FSK write error!");
+                            refreshp();
+                            sleep(5);
+                        }
+                        fldigi_ptt_last = FLDIGI_TX;
+                    }
+                    if (fldigi_get_tx_text(fldigi_tx_line) != 0) {
+                        mvprintw(24, 0,
+                            "Warning: Fldigi error!");
+                        refreshp();
+                        sleep(5);
+                    }
+                    if (strlen(fldigi_tx_line) > 0) {
+                        for(f=0; f < strlen(fldigi_tx_line); f++) {
+                            if (serial_write(fldigi_tx_line[f]) <= 0) {
+                                mvprintw(24, 0,
+                                    "Warning: FSK write error!");
+                                refreshp();
+                                sleep(5);
+                            }
+                        }
+                    }
+                }
+                if (fldigi_get_rxtx_state() != 0) {
+                    mvprintw(24, 0,
+                        "Warning: Fldigi error!");
+                    refreshp();
+                    sleep(5);
+                }
+                if (fldigi_ptt == FLDIGI_RX) {
+                    if (fldigi_ptt_last == FLDIGI_TX) {
+                        if (serial_write(']') <= 0) {
+                            mvprintw(24, 0,
+                                "Warning: FSK write error!");
+                            refreshp();
+                            sleep(5);
+                        }
+                        fldigi_ptt_last = FLDIGI_RX;
+                    }
+                }
+
+            }
 	}
 
 	if (stop_backgrnd_process == 0) {
