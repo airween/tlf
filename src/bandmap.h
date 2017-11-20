@@ -31,7 +31,6 @@ typedef struct {
     char 	dupe;	/* only used internal in bm_show() */
     int 	cqzone;	/* CQ zone */
     int 	ctynr;	/* Country nr */
-    int 	dxcc_index;	/* index of DXC list array - used for country nr, but it's wrong */
     char 	*pfx; /* prefix */
 } spot;
 

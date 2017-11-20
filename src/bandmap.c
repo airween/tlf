@@ -139,10 +139,10 @@ void bmdata_write_file() {
     fprintf(fp, "%d\n", (int)tv.tv_sec);
     while (found != NULL) {
 	sp = found->data;
-	fprintf(fp, "%s;%d;%d;%d;%c;%u;%d;%d;%d;%d;%s\n",
+	fprintf(fp, "%s;%d;%d;%d;%c;%u;%d;%d;%d;%s\n",
 		sp->call, sp->freq, sp->mode, sp->band,
 		sp->node, (int)sp->timeout, sp->dupe, sp->cqzone,
-		sp->ctynr, sp->dxcc_index, sp->pfx);
+		sp->ctynr, sp->pfx);
 	found = found->next;
     }
 
@@ -196,9 +196,7 @@ void bmdata_read_file() {
 					break;
 			case 8:		sscanf(token, "%u", &entry->ctynr);
 					break;
-			case 9:		sscanf(token, "%u", &entry->dxcc_index);
-					break;
-			case 10:	entry->pfx = g_strdup(token);
+			case 9:		entry->pfx = g_strdup(token);
 					break;
                     }
 		    fc++;
@@ -326,7 +324,6 @@ void bandmap_addspot( char *call, unsigned int freq, char node) {
     int band;
     char mode;
     dxcc_data *dxccdata;
-    prefix_data *pfxdata;
     int dxccindex;
     int wi;
     char *lastexch;
@@ -396,14 +393,12 @@ void bandmap_addspot( char *call, unsigned int freq, char node) {
         }
         if (dxccindex >= 0) {
             dxccdata = dxcc_by_index(dxccindex);
-            pfxdata = prefix_by_index(dxccindex);
             entry -> cqzone = dxccdata->cq;
             if (lastexch != NULL) {
                 entry -> cqzone = atoi(lastexch);
                 g_free(lastexch);
             }
-            entry -> dxcc_index = dxccindex;    // used dxcc_index for store the ctynt, but it's wrong
-            entry -> ctynr = pfxdata->dxcc_index;
+            entry -> ctynr = dxccindex;
             entry -> pfx = g_strdup(dxccdata->pfx);
         }
         else {
@@ -486,7 +481,7 @@ int bm_ismulti( char * call, spot *data, int band) {
 
     if (data != NULL && data->cqzone >= 0 && data->ctynr >= 0) {
         if (strcmp(whichcontest, "cqww") == 0) {
-            if ((zones[data->cqzone] & inxes[band]) == 0 || (countries[data->dxcc_index] & inxes[band]) == 0) {
+            if ((zones[data->cqzone] & inxes[band]) == 0 || (countries[data->ctynr] & inxes[band]) == 0) {
                 return 1;
             }
         }
