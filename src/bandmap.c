@@ -380,7 +380,7 @@ void bandmap_addspot( char *call, unsigned int freq, char node) {
 	entry -> timeout = SPOT_NEW;
 	entry -> dupe = 0;	/* Dupe will be determined later. */
 
-        lastexch = NULL;
+	lastexch = NULL;
 	dxccindex = getctynr(entry->call);
         if (strcmp(whichcontest, "cqww") == 0) {
             // check if the callsign exists in worked list
@@ -402,9 +402,9 @@ void bandmap_addspot( char *call, unsigned int freq, char node) {
             entry -> pfx = g_strdup(dxccdata->pfx);
         }
         else {
-            entry -> cqzone = -1;
-            entry -> ctynr = -1;
-            strcpy(entry -> pfx, "");
+            entry -> cqzone = 0;
+            entry -> ctynr = 0;
+            entry -> pfx = g_strdup("");
         }
 	allspots = g_list_insert_sorted( allspots, entry, (GCompareFunc)cmp_freq);
 	/* lookup where it is */
