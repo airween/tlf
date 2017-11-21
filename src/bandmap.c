@@ -380,27 +380,20 @@ void bandmap_addspot( char *call, unsigned int freq, char node) {
 	entry -> timeout = SPOT_NEW;
 	entry -> dupe = 0;	/* Dupe will be determined later. */
 
+        lastexch = NULL;
 	dxccindex = getctynr(entry->call);
         if (strcmp(whichcontest, "cqww") == 0) {
             // check if the callsign exists in worked list
-	    /* FIXME: Initialization of lastexch shoul be outside of the line
-	     * above */
-            lastexch = NULL;
             for(wi=0; wi<nr_worked; wi++) {
                 if (strcmp(worked[wi].call, call) == 0) {
                     lastexch = g_strdup(worked[wi].exchange);
-		    /* FIXME: It seems you want to stop searching in next
-		     * line, better use a simple 'break' for it */
-                    wi = nr_worked;
+                    break;
                 }
             }
         }
-        if (dxccindex >= 0) {
-	/* FIXME: dxccindex  will never be < 0, test is always true */
+        if (dxccindex > 0) {
             dxccdata = dxcc_by_index(dxccindex);
             entry -> cqzone = dxccdata->cq;
-	    /* FIXME: if whichcontest is NOT cqww lastexch is NOT initialized,
-	     * the result of the test is then indetermined (see above) */
             if (lastexch != NULL) {
                 entry -> cqzone = atoi(lastexch);
                 g_free(lastexch);
@@ -749,16 +742,6 @@ void bandmap_show() {
 
     list = allspots;
 
-    /* FIXME: next 8 lines makes no sense as _tv and _old_tv is not used
-     * anywhere */
-    struct timeval _tv;
-    static struct timeval _old_tv;
-
-    gettimeofday(&_tv, NULL);
-
-    if (_old_tv.tv_sec == 0) {
-        _old_tv.tv_sec = _tv.tv_sec;
-    }
     while (list) {
 	data = list->data;
 
