@@ -328,7 +328,6 @@ void bandmap_addspot( char *call, unsigned int freq, char node) {
     int dxccindex;
     int wi;
     char *lastexch;
-    extern char exchange_list[40];
     extern struct ie_list *main_ie_list;
     struct ie_list *current_ie;
 
@@ -394,7 +393,7 @@ void bandmap_addspot( char *call, unsigned int freq, char node) {
                     break;
                 }
             }
-            if (lastexch == NULL && *exchange_list != '\0') {
+            if (lastexch == NULL && main_ie_list != NULL) {
                 current_ie = main_ie_list;
 
                 while (current_ie) {
