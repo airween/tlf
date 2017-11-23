@@ -83,6 +83,7 @@ int log_recv_qtc_to_disk(int qsonr)
                 qtc_line.freq = 0;
             }
 
+            qtc_line.callpos = 0;
             make_qtc_logline(qtc_line, QTC_RECV_LOG);
 
         }
@@ -150,15 +151,30 @@ int log_sent_qtc_to_disk(int qsonr)
 
             strcpy(qtc_line.qtcstr, qtclist.qtclines[i].qtc);
             tempstrp = strtok(qtc_line.qtcstr, " ");
-            strcpy(qtc_line.qtc_time, tempstrp);
+            if (tempstrp != NULL) {
+                strcpy(qtc_line.qtc_time, tempstrp);
+            }
+            else {
+                strcpy(qtc_line.qtc_time, "----");
+            }
 
             tempstrp = strtok(NULL, " ");
             g_strchomp(tempstrp);
-            strcpy(qtc_line.qtc_call, tempstrp);
+            if (tempstrp != NULL) {
+                strcpy(qtc_line.qtc_call, tempstrp);
+            }
+            else {
+                strcpy(qtc_line.qtc_call, "-------------");
+            }
 
             tempstrp = strtok(NULL, " ");
             g_strchomp(tempstrp);
-            qtc_line.qtc_serial = atoi(tempstrp);
+            if (tempstrp != NULL) {
+                qtc_line.qtc_serial = atoi(tempstrp);
+            }
+            else {
+                qtc_line.qtc_serial = 0;
+            }
 
             qtc_line.callpos = qtclist.qtclines[i].qsoline+1;
 
@@ -235,24 +251,32 @@ void make_qtc_logline(struct read_qtc_t qtc_line, char * fname) {
 
         char nodemark = ' ';
         char qtclogline[120];
+        char padding[2] = " ";
 
         if (lan_active == 1) {
             nodemark = thisnode;
         }
         memset(qtclogline, '\0', 120);
+        if (qtc_line.qtc_serial > 1000) {
+            padding[0] = '\0';
+        }
+        else {
+            padding[0] = ' ';
+            padding[1] = '\0';
+        }
         if (qtc_line.direction == RECV) {
-            sprintf(qtclogline, "%s%s %04d %s %s %c %-14s %04d %04d %s %-15s %03d    %7.1f\n", qtc_line.band, qtc_line.mode, qtc_line.qsonr,
+            sprintf(qtclogline, "%s%s %04d %s %s %c %-14s %04d %04d %s %-15s%s%03d    %7.1f\n", qtc_line.band, qtc_line.mode, qtc_line.qsonr,
                 qtc_line.date, qtc_line.time, nodemark, qtc_line.call, qtc_line.qtchead_serial, qtc_line.qtchead_count,
-                qtc_line.qtc_time, qtc_line.qtc_call, qtc_line.qtc_serial, qtc_line.freq);
+                qtc_line.qtc_time, qtc_line.qtc_call, padding, qtc_line.qtc_serial, qtc_line.freq);
             store_qtc(qtclogline, qtc_line.direction, fname);
             if (lan_active == 1) {
                 send_lan_message(QTCRENTRY, qtclogline);
             }
         }
         if (qtc_line.direction == SEND) {
-            sprintf(qtclogline, "%s%s %04d %04d %s %s %c %-14s %04d %04d %s %-14s %03d    %7.1f\n", qtc_line.band, qtc_line.mode, qtc_line.qsonr,
+            sprintf(qtclogline, "%s%s %04d %04d %s %s %c %-14s %04d %04d %s %-14s%s%03d    %7.1f\n", qtc_line.band, qtc_line.mode, qtc_line.qsonr,
                 qtc_line.callpos, qtc_line.date, qtc_line.time, nodemark, qtc_line.call, qtc_line.qtchead_serial, qtc_line.qtchead_count,
-                qtc_line.qtc_time, qtc_line.qtc_call, qtc_line.qtc_serial, qtc_line.freq);
+                qtc_line.qtc_time, qtc_line.qtc_call, padding, qtc_line.qtc_serial, qtc_line.freq);
             store_qtc(qtclogline, qtc_line.direction, fname);
             if (lan_active == 1) {
                 send_lan_message(QTCSENTRY, qtclogline);
