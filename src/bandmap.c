@@ -386,6 +386,7 @@ void bandmap_addspot( char *call, unsigned int freq, char node) {
 	lastexch = NULL;
 	dxccindex = getctynr(entry->call);
         if (cqww == 1) {
+	    // FIXME: better use searchcallarray() here
             // check if the callsign exists in worked list
             for(wi=0; wi<nr_worked; wi++) {
                 if (strcmp(worked[wi].call, call) == 0) {
@@ -486,12 +487,14 @@ int bm_ismulti( char * call, spot *data, int band) {
 
     int found;
 
+    /* FIXME: the next 6 lines makes no sense here and should be dropped */
     if (call != NULL) {
         found = searchcallarray(call);
 
         if (found == -1)		/* new call */
             return 0;
     }
+
     if (data != NULL && data->cqzone > 0 && data->ctynr > 0) {
         if (cqww == 1) {
             if ((zones[data->cqzone] & inxes[band]) == 0 || (countries[data->ctynr] & inxes[band]) == 0) {
