@@ -253,15 +253,15 @@ struct qso_t *get_next_qtc_record (FILE *fp, int qtcdirection)
 void free_qso(struct qso_t *ptr) {
 
     if (ptr != NULL) {
-        g_free( ptr->comment );
-        g_free( ptr->logline );
-        g_free( ptr->call );
-        if (ptr->qtc_qtime != NULL) {
+	g_free( ptr->comment );
+	g_free( ptr->logline );
+	g_free( ptr->call );
+	if (ptr->qtc_qtime != NULL) {
 	    g_free( ptr->qtc_qtime );
 	    g_free( ptr->qtc_qcall );
 	    g_free( ptr->qtc_qserial );
-        }
-        g_free( ptr );
+	}
+	g_free( ptr );
     }
 }
 
@@ -391,8 +391,8 @@ void prepare_line( struct qso_t *qso, struct cabrillo_desc *desc, char *buf ) {
     GPtrArray *item_array;
 
     if (qso == NULL) {
-      strcpy(buf, "");
-      return;
+	strcpy(buf, "");
+	return;
     }
 
     freq = (int)qso->freq;

@@ -67,6 +67,7 @@
 #include "time_update.h"
 #include "ui_utils.h"
 #include "writeparas.h"
+#include "showzones.h"
 
 #include <math.h>
 
@@ -184,6 +185,7 @@ char callinput(void)
 
     for (i = strlen(hiscall); i <= 13; i++) {
 
+	show_zones(bandinx);
 	printcall();
 
 	/* wait for next char pressed, but update time, cluster and TRX qrg */
@@ -919,9 +921,13 @@ char callinput(void)
 	// Exclamation, open a new shell.
 	case '!':
 	    {
+                const char *shell = getenv("SHELL");
+                if (shell == NULL) {
+                    shell = "sh";
+                }
 		endwin();
 		rc=system("clear");
-		rc=system("sh");
+		rc=system(shell);
 		rc=system("clear");
 		set_term(mainscreen);
 		clear_display();

@@ -403,7 +403,8 @@ int multlist = 0;
 int callareas[20];
 int multscore[NBANDS];
 
-struct ie_list *main_ie_list;	/* head of initial exchange list */
+struct ie_list *main_ie_list = NULL;
+				/* head of initial exchange list */
 
 int zonescore[NBANDS];
 int countryscore[NBANDS];
@@ -873,8 +874,7 @@ void tlf_cleanup()
 	pthread_join(background_thread, NULL);
     }
 
-//    commented out for the moment as it will segfault if called twice
-//    cleanup_telnet();
+    cleanup_telnet();
 
     if (trxmode == CWMODE && cwkeyer == NET_KEYER)
 	netkeyer_close();
