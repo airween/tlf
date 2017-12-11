@@ -950,13 +950,16 @@ int main(int argc, char *argv[])
         sprintf(tstring, "Converting cabrillo for contest %s from file %s.cbr", whichcontest, g_strstrip(call));
         showmsg(tstring);
         showmsg("");
-        refreshp();
-        getmessages();
-        readcabrillo(READCAB_MODE_CLI);
-        tlf_cleanup();
-        exit(0);
+        getstationinfo();
+        if(0!=readcabrillo(READCAB_MODE_CLI))
+            showmsg("Sorry. Conversion failed....");
+        else
+            showmsg("Done...");
+        sleep(2);
+        endwin();
+        exit(EXIT_SUCCESS);
     }
-    
+
     /* now setup colors */
     ui_color_init();
 
