@@ -67,6 +67,7 @@
 #include "time_update.h"
 #include "ui_utils.h"
 #include "writeparas.h"
+#include "showzones.h"
 
 #include <math.h>
 
@@ -184,6 +185,7 @@ char callinput(void)
 
     for (i = strlen(hiscall); i <= 13; i++) {
 
+	show_zones(bandinx);
 	printcall();
 
 	/* wait for next char pressed, but update time, cluster and TRX qrg */
@@ -213,10 +215,10 @@ char callinput(void)
 		}
 	    }
 
-	    /* if BMAUTOGRAB is active and input field is empty and a spot has
+	    /* if BMAUTOGRAB is active in S&P mode and input field is empty and a spot has
 	     * not already been grabbed here check if a spot is on freq
 	     * and pick it up if one found */
-	    if (bmautograb != 0 && *hiscall == '\0' && grab.state == NONE) {
+	    if (bmautograb && cqmode == S_P && *hiscall == '\0' && grab.state == NONE) {
 		get_spot_on_qrg(grab.call, freq);
 		if (strlen(grab.call) >= 3) {
 		    strncpy(hiscall, grab.call, sizeof(hiscall));
@@ -919,9 +921,13 @@ char callinput(void)
 	// Exclamation, open a new shell.
 	case '!':
 	    {
+                const char *shell = getenv("SHELL");
+                if (shell == NULL) {
+                    shell = "sh";
+                }
 		endwin();
 		rc=system("clear");
-		rc=system("sh");
+		rc=system(shell);
 		rc=system("clear");
 		set_term(mainscreen);
 		clear_display();

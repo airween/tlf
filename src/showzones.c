@@ -24,66 +24,61 @@
 
 #include "nicebox.h"		// Includes curses.h
 #include "tlf.h"
+#include "tlf_panel.h"
 
 
 int show_zones(int bandinx)
 {
-
     extern int zonedisplay;
-    extern int bandindex;
     extern int zones[MAX_ZONES];
 
+    static WINDOW *zones_win = NULL;
+    static PANEL *zones_panel = NULL;
+
     int i = 0, j = 0;
-    int xloc = 19;
-    int yloc = 15;
+    int xloc = 1;
+    int yloc = 1;
+    int zonenr;
 
-    if (zonedisplay != 1)
-	return (0);
-
-    switch (bandinx) {
-    case 0:{
-	    bandindex = BAND160;
-	    break;
+    if (zones_panel == NULL) {
+	zones_win = newwin(10, 18, 14, 22 );
+	if (zones_win == NULL)
+	    return -1;
+	zones_panel = new_panel(zones_win);
+	if (zones_panel == NULL) {
+	    delwin(zones_win);
+	    return -1;
 	}
-    case 1:{
-	    bandindex = BAND80;
-	    break;
-	}
-    case 2:{
-	    bandindex = BAND40;
-	    break;
-	}
-    case 4:{
-	    bandindex = BAND20;
-	    break;
-	}
-    case 6:{
-	    bandindex = BAND15;
-	    break;
-	}
-    case 8:
-	bandindex = BAND10;
     }
 
-    attron(COLOR_PAIR(C_INPUT) | A_STANDOUT);
+    if (zonedisplay != 1) {
+	hide_panel(zones_panel);
+	return (0);
+    }
 
-    for (i = 0; i <= 7; i++) {
+    show_panel( zones_panel );
+    top_panel( zones_panel );
+    werase(zones_win);
+    wnicebox(zones_win, 0, 0, 8, 16, "Zones");
 
-	for (j = 1; j <= 5; j++) {
+    wattron(zones_win, COLOR_PAIR(C_INPUT) | A_STANDOUT);
 
-	    if ((zones[(i * 5) + j] & bandindex) == 0) {
+    for (i = 0; i < 8; i++) {
 
-		mvprintw(i + yloc, (j * 3) + xloc, " %02d", (i * 5) + j);
+	wmove(zones_win, i + yloc, xloc);
+	for (j = 0; j < 5; j++) {
 
+	    zonenr = (i * 5) + j + 1;   /* 1.. 40 */
+	    if ((zones[zonenr] & inxes[bandinx]) == 0) {
+		/* still to work */
+		wprintw(zones_win, " %02d", zonenr);
 	    } else {
-
-		mvprintw(i + yloc, (j * 3) + xloc, "   ");
-
+		/* already worked */
+		wprintw(zones_win, "   ");
 	    }
 	}
-
+	wprintw(zones_win, " ");
     }
-    nicebox(14, 22, 8, 14, "Zones");
 
     return (0);
 }

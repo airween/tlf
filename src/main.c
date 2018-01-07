@@ -59,6 +59,7 @@
 #include "tlf_panel.h"
 #include "ui_utils.h"
 #include "serialmodem.h"
+#include "readcabrillo.h"
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -290,7 +291,6 @@ char ituzone[3] = "";
 char continent[3] = "";
 char mycontinent[3] = "";
 char pxstr[11] = "";
-int bandindex = 0;
 int totalmults = 0;
 int totalcountries = 0;
 int totalzones = 0;
@@ -405,7 +405,8 @@ int multlist = 0;
 int callareas[20];
 int multscore[NBANDS];
 
-struct ie_list *main_ie_list;	/* head of initial exchange list */
+struct ie_list *main_ie_list = NULL;
+				/* head of initial exchange list */
 
 int zonescore[NBANDS];
 int countryscore[NBANDS];
@@ -420,7 +421,7 @@ int qsonum = 1;			/* nr of next QSO */
 int ymax, xmax;			/* screen size */
 
 pid_t pid;
-struct tm *time_ptr;
+struct tm *time_ptr, time_ptr_cabrillo;
 
 float freq;
 float mem;
@@ -464,6 +465,8 @@ char itustr[3];
 
 int nopacket = 0;		/* set if tlf is called with '-n' */
 int no_trx_control = 0;		/* set if tlf is called with '-r' */
+int convert_cabrillo = 0;       /* set if the arg input is a cabrillo */
+int do_cabrillo = 0;		/* actually converting cabrillo file to Tlf log */
 
 int bandweight_points[NBANDS] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 0};
 int bandweight_multis[NBANDS] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 0};
@@ -510,6 +513,9 @@ void parse_options(int argc, char *argv[])
 	case 'r':
 	    no_trx_control = 1; // disable radio control
 	    break;
+        case 'i':
+            convert_cabrillo = 1;
+            break;
 	default:
 	    printf("Use: tlf [-v] Verbose\n");
 	    printf("         [-V] Version\n");
@@ -518,6 +524,7 @@ void parse_options(int argc, char *argv[])
 	    printf("         [-h] This message\n");
 	    printf("         [-n] Start without cluster hookup\n");
 	    printf("         [-r] Start without radio control\n");
+	    printf("         [-i] Import cabrillo file to Tlf format\n");
 	    exit(0);
 	    break;
 	}
@@ -869,8 +876,7 @@ void tlf_cleanup()
 	pthread_join(background_thread, NULL);
     }
 
-//    commented out for the moment as it will segfault if called twice
-//    cleanup_telnet();
+    cleanup_telnet();
 
     if (trxmode == CWMODE && cwkeyer == NET_KEYER)
 	netkeyer_close();
@@ -942,6 +948,21 @@ int main(int argc, char *argv[])
 	sleep(2);
 	endwin();
 	exit(EXIT_FAILURE);
+    }
+
+    if (convert_cabrillo == 1) {
+        char tstring[100] = "";
+        sprintf(tstring, "Converting cabrillo for contest %s from file %s.cbr", whichcontest, g_strstrip(call));
+        showmsg(tstring);
+        showmsg("");
+        getstationinfo();
+        if(0!=readcabrillo(READCAB_MODE_CLI))
+	    showmsg("Sorry. Conversion failed....");
+	else
+	    showmsg("Done...");
+	sleep(2);
+	endwin();
+        exit(EXIT_SUCCESS);
     }
 
     /* now setup colors */
