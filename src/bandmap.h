@@ -21,6 +21,8 @@
 #ifndef _BANDMAP_H
 #define _BANDMAP_H
 
+#include "tlf.h"
+
 typedef struct {
     char 	*call;
     int 	freq;	/* freq in Hz */
@@ -146,4 +148,10 @@ spot *bandmap_lookup(char *partialcall);
 spot *bandmap_next(unsigned int upwards, unsigned int freq);
 
 void get_spot_on_qrg(char *dest, float freq);
+
+/** \brief convert frequency in Hz to bandindex
+ *
+ * \return	bandindex or BANDINDEX_OOB if not in any band
+ */
+int freq2band(unsigned int freq);
 #endif
