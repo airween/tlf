@@ -37,5 +37,7 @@ int fldigi_send_text(char * line);
 void fldigi_to_rx();
 int fldigi_get_rxtx_state();
 void xmlrpc_showinfo();
+int fldigi_get_log_call();
+int fldigi_get_log_serial_number();
 
 #endif /* end of include guard: FLDIGIXMLRPC_H */

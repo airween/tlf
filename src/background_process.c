@@ -126,7 +126,21 @@ void *background_process(void *ptr)
 	    fldigi_rpc_cnt = 1 - fldigi_rpc_cnt;
 	    if (digikeyer == FLDIGI && fldigi_fsk == 1) {
 
-	        if (fldigi_get_rxtx_state() != 0) {
+                if (fldigi_get_log_call() != 0) {
+                    mvprintw(24, 0,
+                        "Warning: Fldigi error!");
+                    refreshp();
+                    sleep(5);
+                }
+
+                if (fldigi_get_log_serial_number() != 0) {
+                    mvprintw(24, 0,
+                        "Warning: Fldigi error!");
+                    refreshp();
+                    sleep(5);
+                }
+
+                if (fldigi_get_rxtx_state() != 0) {
                     mvprintw(24, 0,
                         "Warning: Fldigi error!");
                     refreshp();
@@ -176,7 +190,6 @@ void *background_process(void *ptr)
                         fldigi_ptt_last = FLDIGI_RX;
                     }
                 }
-
             }
 	}
 

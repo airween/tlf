@@ -25,12 +25,16 @@
 #include <stdarg.h>	// need for va_list...
 #include <unistd.h>
 #include <pthread.h>
+#include <glib.h>
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
 #endif
 
 #include "fldigixmlrpc.h"
+#include "printcall.h"
+#include "ui_utils.h"
+#include "logit.h"
 
 #ifdef HAVE_LIBXMLRPC
 # include <xmlrpc-c/base.h>
@@ -71,13 +75,16 @@ pthread_mutex_t xmlrpc_mutex = PTHREAD_MUTEX_INITIALIZER;
 /*
  * Used XML RPC methods, and its formats of arguments
  * ==================================================
- main.rx             n:n  - RX
- main.tx             n:n  - TX
- main.get_trx_state  s:n  - get RX/TX state, 's' could be "RX" | "TX"
-   rx.get_data       6:n   (bytes:) - get content of RX window since last query
- text.add_tx         n:s  - add content to TX window
-modem.get_carrier    i:n  - get carrier of modem
-modem.set_carrier    i:i  - set carrier of modem
+ main.rx                n:n  - RX
+ main.tx                n:n  - TX
+ main.get_trx_state     s:n  - get RX/TX state, 's' could be "RX" | "TX"
+   rx.get_data          6:n (bytes:) - get content of RX window since last query
+ text.add_tx            n:s  - add content to TX window
+modem.get_carrier       i:n  - get carrier of modem
+modem.set_carrier       i:i  - set carrier of modem
+  log.get_call          s:n  - Returns the Call field contents
+  log.get_serial_number s:n  - Returns the serial number field contents
+  rig.set_frequency     d:d  - Sets the RF carrier frequency. Returns the old value
 
 
  // other usable functions
@@ -197,6 +204,17 @@ int fldigi_xmlrpc_query(xmlrpc_res * local_result, xmlrpc_env * local_env,
 	    else if(*format == 'd') {
 		int d = va_arg(argptr, int);
 		va_param = xmlrpc_int_new(local_env, d);
+		xmlrpc_array_append_item(local_env, pcall_array, va_param);
+		if (local_env->fault_occurred) {
+		    va_end(argptr);
+		    pthread_mutex_unlock( &xmlrpc_mutex );
+		    return -1;
+		}
+		xmlrpc_DECREF(va_param);
+	    }
+            else if(*format == 'f') {
+		double f = va_arg(argptr, double);
+		va_param = xmlrpc_double_new(local_env, f);
 		xmlrpc_array_append_item(local_env, pcall_array, va_param);
 		if (local_env->fault_occurred) {
 		    va_end(argptr);
@@ -341,7 +359,7 @@ int fldigi_get_rx_text(char * line) {
 
     rc = fldigi_xmlrpc_query(&result, &env, "text.get_rx_length", "");
     if (rc != 0) {
-	return 0;
+	return -1;
     }
 
     textlen = result.intval;
@@ -353,7 +371,7 @@ int fldigi_get_rx_text(char * line) {
 	    rc = fldigi_xmlrpc_query(&result, &env, "text.get_rx", "dd",
 		    lastpos, textlen);
 	    if (rc != 0) {
-		return 0;
+		return -1;
 	    }
 
 	    if (result.intval > 0 && result.byteval != NULL) {
@@ -386,7 +404,7 @@ int fldigi_get_tx_text(char * line) {
 
     rc = fldigi_xmlrpc_query(&result, &env, "tx.get_data", "");
     if (rc != 0) {
-        return 0;
+        return -1;
     }
     else {
         if (result.intval > 0 && result.byteval != NULL) {
@@ -410,6 +428,7 @@ int fldigi_xmlrpc_get_carrier() {
 
     extern int rigmode;
     extern int trx_control;
+    extern float freq;
     int rc;
     xmlrpc_res result;
     xmlrpc_env env;
@@ -433,9 +452,15 @@ int fldigi_xmlrpc_get_carrier() {
 			    "modem.set_carrier", "d",
 			    (xmlrpc_int32) CENTER_FREQ);
 		    if (rc != 0) {
-			return 0;
+			return -1;
 		    }
 		    fldigi_var_shift_freq = CENTER_FREQ-fldigi_var_carrier;
+                    rc = fldigi_xmlrpc_query(&result, &env,
+			    "rig.set_frequency", "f",
+			    (xmlrpc_double) freq);
+		    if (rc != 0) {
+			return -1;
+		    }
 		}
 	    }
 	}
@@ -476,20 +501,6 @@ int fldigi_get_carrier() {
 #endif
 }
 
-int fldigi_get_shift_freq() {
-#ifdef HAVE_LIBXMLRPC
-	int t;				/* temp var to store real variable
-					   before cleaning it up */
-	t = fldigi_var_shift_freq;	/* clean is necessary to check that
-					   it readed by called this function */
-	fldigi_var_shift_freq = 0;	/* needs to keep in sync with the
-					   rig VFO */
-        return t;
-#else
-        return 0;
-#endif
-}
-
 int fldigi_get_rxtx_state() {
 #ifdef HAVE_LIBXMLRPC
     int rc;
@@ -500,7 +511,7 @@ int fldigi_get_rxtx_state() {
 
     rc = fldigi_xmlrpc_query(&result, &env, "main.get_trx_state", "");
     if (rc != 0) {
-        return 0;
+        return -1;
     }
     else {
         if (strcmp(result.stringval, "TX") == 0) {
@@ -517,6 +528,97 @@ int fldigi_get_rxtx_state() {
 #endif
     return 0;
 }
+
+int fldigi_get_log_call() {
+#ifdef HAVE_LIBXMLRPC
+    int rc;
+    xmlrpc_res result;
+    xmlrpc_env env;
+
+    xmlrpc_res_init(&result);
+
+    extern char hiscall[];
+    char tempstr[20];
+    int i;
+
+    rc = fldigi_xmlrpc_query(&result, &env, "log.get_call", "");
+    if (rc != 0) {
+        return -1;
+    }
+    else {
+        if (result.stringval != NULL) {
+            for(i=0; i<20 && result.stringval[i] != '\0'; i++) {
+                tempstr[i] = result.stringval[i];
+            }
+            tempstr[i] = '\0';
+            g_strchomp(tempstr);
+            if (strlen(tempstr) > 3 && strcmp(tempstr, hiscall) != 0) {
+                strcpy(hiscall, tempstr);
+                hiscall[strlen(tempstr)] = '\0';
+                printcall();
+            }
+        }
+        free((void *)result.stringval);
+        if (result.byteval != NULL) {
+            free((void *)result.byteval);
+        }
+    }
+#endif
+    return 0;
+}
+
+int fldigi_get_log_serial_number() {
+#ifdef HAVE_LIBXMLRPC
+    int rc;
+    xmlrpc_res result;
+    xmlrpc_env env;
+
+    xmlrpc_res_init(&result);
+
+    extern char comment[];
+    char tempstr[20];
+    int i;
+
+    rc = fldigi_xmlrpc_query(&result, &env, "log.get_serial_number", "");
+    if (rc != 0) {
+        return -1;
+    }
+    else {
+        if (result.stringval != NULL) {
+            for(i=0; i<20 && result.stringval[i] != '\0'; i++) {
+                tempstr[i] = result.stringval[i];
+            }
+            tempstr[i] = '\0';
+            g_strchomp(tempstr);
+            if (strlen(tempstr) > 0 && strcmp(tempstr, comment) != 0) {
+                strcpy(comment, tempstr);
+                comment[strlen(tempstr)] = '\0';
+                refresh_comment();
+            }
+        }
+        free((void *)result.stringval);
+        if (result.stringval != NULL) {
+            free((void *)result.byteval);
+        }
+    }
+#endif
+    return 0;
+}
+
+int fldigi_get_shift_freq() {
+#ifdef HAVE_LIBXMLRPC
+	int t;				/* temp var to store real variable
+					   before cleaning it up */
+	t = fldigi_var_shift_freq;	/* clean is necessary to check that
+					   it readed by called this function */
+	fldigi_var_shift_freq = 0;	/* needs to keep in sync with the
+					   rig VFO */
+        return t;
+#else
+        return 0;
+#endif
+}
+
 
 void xmlrpc_showinfo() {
 #ifdef HAVE_LIBXMLRPC		// Show xmlrpc status
