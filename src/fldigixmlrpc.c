@@ -42,6 +42,8 @@
 # include <xmlrpc-c/client_global.h>
 #endif
 
+#include <syslog.h>
+
 #ifdef HAVE_LIBHAMLIB
 # include <hamlib/rig.h>
 #endif
@@ -455,17 +457,18 @@ int fldigi_xmlrpc_get_carrier() {
 			return -1;
 		    }
 		    fldigi_var_shift_freq = CENTER_FREQ-fldigi_var_carrier;
-                    rc = fldigi_xmlrpc_query(&result, &env,
-			    "rig.set_frequency", "f",
-			    (xmlrpc_double) freq);
-		    if (rc != 0) {
-			return -1;
-		    }
 		}
 	    }
 	}
 
-	if (rigmode != RIG_MODE_NONE) {
+	rc = fldigi_xmlrpc_query(&result, &env,
+                "rig.set_frequency", "f",
+                (xmlrpc_double) freq);
+        if (rc != 0) {
+            return -1;
+        }
+
+        if (rigmode != RIG_MODE_NONE) {
 	    switch (rigmode) {
 		case RIG_MODE_USB:	signum = 1;
 					modeshift = 0;
