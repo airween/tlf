@@ -42,8 +42,6 @@
 # include <xmlrpc-c/client_global.h>
 #endif
 
-#include <syslog.h>
-
 #ifdef HAVE_LIBHAMLIB
 # include <hamlib/rig.h>
 #endif
