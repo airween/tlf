@@ -1007,7 +1007,7 @@ int main(int argc, char *argv[])
     }
 
     /* now start logging  !! Does never return */
-    logit(NULL);
+    logit();
 
     return 0;
 }
