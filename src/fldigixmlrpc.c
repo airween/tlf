@@ -355,7 +355,7 @@ int fldigi_send_text(char *line) {
 }
 
 /* read the text from Fldigi's RX window, from last read position */
-int fldigi_get_rx_text(char *line) {
+int fldigi_get_rx_text(char *line, int len) {
 #ifdef HAVE_LIBXMLRPC
     int rc;
     xmlrpc_res result;
@@ -363,6 +363,7 @@ int fldigi_get_rx_text(char *line) {
     static int lastpos = 0;
     int textlen = 0;
     int retval = 0;
+    int linelen = 0;
 
     rc = fldigi_xmlrpc_query(&result, &env, "text.get_rx_length", "");
     if (rc != 0) {
@@ -381,9 +382,13 @@ int fldigi_get_rx_text(char *line) {
 	    }
 
 	    if (result.intval > 0 && result.byteval != NULL) {
-		memcpy(line, result.byteval, result.intval);
-		line[result.intval] = '\0';
-		retval = result.intval;
+		linelen = result.intval;
+		if (result.intval > len) {
+		    linelen = len;
+		}
+		memcpy(line, result.byteval, linelen - 1);
+		line[linelen] = '\0';
+		retval = linelen;
 	    }
 	    if (result.byteval != NULL) {
 		free((void *)result.byteval);
