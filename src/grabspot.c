@@ -71,7 +71,7 @@ double grab_next(void) {
     data = bandmap_next(dir, (unsigned int)(freq * 1000));
 
     if (data == NULL) {		/* nothing in that direction */
-				/* try other one */
+	/* try other one */
 	dir = 1 - dir;
 	data = bandmap_next(dir, (unsigned int)(freq * 1000));
     }

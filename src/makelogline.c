@@ -269,12 +269,12 @@ void prepare_specific_part(void) {
 
     } else if ((cqww == 1) || (wazmult == 1) || (itumult == 1)) {
 	//-------------------------cqww----------------
-/*
-	if (strlen(zone_fix) > 1) {
-		strcat (logline4, zone_fix);
-	} else
-		strcat (logline4, zone_export);
-*/
+	/*
+		if (strlen(zone_fix) > 1) {
+			strcat (logline4, zone_fix);
+		} else
+			strcat (logline4, zone_export);
+	*/
 	if (trxmode == DIGIMODE && cqww == 1 && strlen(comment) < 5) {
 	    comment[2] = ' ';
 	    comment[3] = 'D';
@@ -323,12 +323,12 @@ void prepare_specific_part(void) {
 	fillto(73);
 
 	if (addzone != 0) {
-/*
-		if (strlen(zone_fix) > 1) {
-			strncat (logline4, zone_fix, 2);
-		} else
-			strncat (logline4, zone_export, 2);
-*/
+	    /*
+	    		if (strlen(zone_fix) > 1) {
+	    			strncat (logline4, zone_fix, 2);
+	    		} else
+	    			strncat (logline4, zone_export, 2);
+	    */
 	    if (strlen(comment) < 2) {
 		strcat(logline4, "0");
 		strncat(logline4, comment, 1);

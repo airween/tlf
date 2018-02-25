@@ -124,8 +124,8 @@ void *background_process(void *ptr) {
 		&& trx_control == 1) {
 	    if (fldigi_rpc_cnt == 0) {
 		fldigi_xmlrpc_get_carrier();
-                fldigi_get_log_call();
-                fldigi_get_log_serial_number();
+		fldigi_get_log_call();
+		fldigi_get_log_serial_number();
 	    }
 	    fldigi_rpc_cnt = 1 - fldigi_rpc_cnt;
 	}

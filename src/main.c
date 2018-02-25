@@ -260,7 +260,7 @@ char message[25][80] = /**< Array of CW/DigiMode messages
 char ph_message[14][80] = /**< Array of file names for voice keyer messages
 			   * See description of message[]
 			   */
-    { "", "", "", "", "", "", "", "", "", "", "", "", "", "" };
+{ "", "", "", "", "", "", "", "", "", "", "", "", "", "" };
 
 char qtc_recv_msgs[12][80] = {"QTC?\n", "QRV\n", "R\n", "", "TIME?\n", "CALL?\n", "NR?\n", "AGN\n", "", "QSL ALL\n", "", ""}; // QTC receive windowS Fx messages
 char qtc_send_msgs[12][80] = {"QRV?\n", "QTC sr/nr\n", "", "", "TIME\n", "CALL\n", "NR\n", "", "", "", "", ""}; // QTC send window Fx messages
@@ -285,7 +285,7 @@ int early_started = 0;			/**< 1 if sending call started early,
 char lastcall[20];
 char qsonrstr[5] = "0001";
 char band[NBANDS][4] =
-    { "160", " 80", " 40", " 30", " 20", " 17", " 15", " 12", " 10", "???" };
+{ "160", " 80", " 40", " 30", " 20", " 17", " 15", " 12", " 10", "???" };
 char comment[80];
 char mode[20] = "Log     ";
 char cqzone[3] = "";

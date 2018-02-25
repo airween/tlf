@@ -109,7 +109,7 @@ xmlrpc_server_info *serverInfoP = NULL;
 
 int fldigi_ptt;
 
-void xmlrpc_res_init(xmlrpc_res * res) {
+void xmlrpc_res_init(xmlrpc_res *res) {
 #ifdef HAVE_LIBXMLRPC
     res->stringval = NULL;
     res->byteval = NULL;
@@ -180,9 +180,8 @@ int fldigi_xmlrpc_query(xmlrpc_res *local_result, xmlrpc_env *local_env,
 	} else {
 	    connerrcnt++;
 	}
-    }
-    else {
-        connerrcnt = 0;
+    } else {
+	connerrcnt = 0;
     }
 
     local_result->stringval = NULL;
@@ -219,14 +218,13 @@ int fldigi_xmlrpc_query(xmlrpc_res *local_result, xmlrpc_env *local_env,
 		    return -1;
 		}
 		xmlrpc_DECREF(va_param);
-	    }
-            else if(*format == 'f') {
+	    } else if (*format == 'f') {
 		double f = va_arg(argptr, double);
 		va_param = xmlrpc_double_new(local_env, f);
 		xmlrpc_array_append_item(local_env, pcall_array, va_param);
 		if (local_env->fault_occurred) {
 		    va_end(argptr);
-		    pthread_mutex_unlock( &xmlrpc_mutex );
+		    pthread_mutex_unlock(&xmlrpc_mutex);
 		    return -1;
 		}
 		xmlrpc_DECREF(va_param);
@@ -279,11 +277,10 @@ int fldigi_xmlrpc_query(xmlrpc_res *local_result, xmlrpc_env *local_env,
 
 	xmlrpc_DECREF(pcall_array);
     }
-    pthread_mutex_unlock( &xmlrpc_mutex );
+    pthread_mutex_unlock(&xmlrpc_mutex);
     if (connerr == 0) {
 	return 0;
-    }
-    else {
+    } else {
 	return -1;
     }
 }
@@ -302,7 +299,7 @@ void fldigi_to_rx() {
 }
 
 /* send message to Fldigi TX window, transmit it */
-int fldigi_send_text(char * line) {
+int fldigi_send_text(char *line) {
     int rc = 0;
 
 #ifdef HAVE_LIBXMLRPC
@@ -358,7 +355,7 @@ int fldigi_send_text(char * line) {
 }
 
 /* read the text from Fldigi's RX window, from last read position */
-int fldigi_get_rx_text(char * line) {
+int fldigi_get_rx_text(char *line) {
 #ifdef HAVE_LIBXMLRPC
     int rc;
     xmlrpc_res result;
@@ -425,9 +422,9 @@ int fldigi_xmlrpc_get_carrier() {
 
     fldigi_var_carrier = (int)result.intval;
 
-/* if mode == RTTY(R), and Hamlib configured, set VFO to new freq where the signal
- * will placed on 2210 Hz - the FSK center freq
- */
+    /* if mode == RTTY(R), and Hamlib configured, set VFO to new freq where the signal
+     * will placed on 2210 Hz - the FSK center freq
+     */
 #ifdef HAVE_LIBHAMLIB
     if (trx_control > 0) {
 	if (rigmode == RIG_MODE_RTTY || rigmode == RIG_MODE_RTTYR) {
@@ -445,52 +442,54 @@ int fldigi_xmlrpc_get_carrier() {
 	    }
 	}
 
-        if (rigmode != RIG_MODE_NONE) {
+	if (rigmode != RIG_MODE_NONE) {
 	    switch (rigmode) {
 		case RIG_MODE_USB:	signum = 1;
-					modeshift = 85;
-					strcpy(fldigi_mode, "USB");
-					break;
+		    modeshift = 85;
+		    strcpy(fldigi_mode, "USB");
+		    break;
 		case RIG_MODE_LSB:	signum = -1;
-					modeshift = 85;
-					strcpy(fldigi_mode, "LSB");
-					break;
+		    modeshift = 85;
+		    strcpy(fldigi_mode, "LSB");
+		    break;
 		case RIG_MODE_RTTY:	signum = 0;
-					modeshift = 0;
-					strcpy(fldigi_mode, "RTTY");
-					break;
-		case RIG_MODE_RTTYR:	signum = -1;	// not checked - I don't have RTTY-REV mode on my RIG
-					modeshift = 0;
-					strcpy(fldigi_mode, "RTTYR");
-					break;
+		    modeshift = 0;
+		    strcpy(fldigi_mode, "RTTY");
+		    break;
+		case RIG_MODE_RTTYR:	signum =
+			-1;	// not checked - I don't have RTTY-REV mode on my RIG
+		    modeshift = 0;
+		    strcpy(fldigi_mode, "RTTYR");
+		    break;
 		case RIG_MODE_CW:	signum = 0;
-					modeshift = 0;
-					strcpy(fldigi_mode, "CW");
-					break;
-		case RIG_MODE_CWR:	signum = -1;	// not checked - I don't have CW-REV mode on my RIG
-					modeshift = 0;
-					strcpy(fldigi_mode, "CWR");
-					break;
-                default:		signum = 0;	// this is the "normal"
-					modeshift = 0;
-					strcpy(fldigi_mode, "CW");
+		    modeshift = 0;
+		    strcpy(fldigi_mode, "CW");
+		    break;
+		case RIG_MODE_CWR:	signum =
+			-1;	// not checked - I don't have CW-REV mode on my RIG
+		    modeshift = 0;
+		    strcpy(fldigi_mode, "CWR");
+		    break;
+		default:		signum = 0;	// this is the "normal"
+		    modeshift = 0;
+		    strcpy(fldigi_mode, "CW");
 	    }
 
 	    /* set the mode in Fldigi */
-            rc = fldigi_xmlrpc_query(&result, &env, "rig.set_mode", "s", fldigi_mode);
-            if (rc != 0) {
-                return -1;
-            }
-	    fldigi_var_carrier = ((signum)*fldigi_var_carrier)+modeshift;
+	    rc = fldigi_xmlrpc_query(&result, &env, "rig.set_mode", "s", fldigi_mode);
+	    if (rc != 0) {
+		return -1;
+	    }
+	    fldigi_var_carrier = ((signum) * fldigi_var_carrier) + modeshift;
 
-            /* also set the freq value in Fldigi FREQ block */
+	    /* also set the freq value in Fldigi FREQ block */
 	    rc = fldigi_xmlrpc_query(&result, &env,
-                    "rig.set_frequency", "f",
-                    (xmlrpc_double) ((freq*1000.0)-(fldigi_var_carrier)));
-            if (rc != 0) {
-                return -1;
-            }
-        }
+				     "rig.set_frequency", "f",
+				     (xmlrpc_double)((freq * 1000.0) - (fldigi_var_carrier)));
+	    if (rc != 0) {
+		return -1;
+	    }
+	}
     }
 #endif
     return 0;
@@ -523,46 +522,45 @@ int fldigi_get_log_call() {
 
     rc = fldigi_xmlrpc_query(&result, &env, "log.get_call", "");
     if (rc != 0) {
-        return -1;
-    }
-    else {
-        if (result.stringval != NULL) {
-            j = 0;
-            // accept only alphanumeric chars and '/' in callsign
-            // in case of QRM, there are many several metachar
-            for(i=0; i<20 && result.stringval[i] != '\0'; i++) {
-                if (isalnum(result.stringval[i]) || result.stringval[i] == '/') {
-                    tempstr[j++] = result.stringval[i];
-                }
-            }
-            tempstr[j] = '\0';
+	return -1;
+    } else {
+	if (result.stringval != NULL) {
+	    j = 0;
+	    // accept only alphanumeric chars and '/' in callsign
+	    // in case of QRM, there are many several metachar
+	    for (i = 0; i < 20 && result.stringval[i] != '\0'; i++) {
+		if (isalnum(result.stringval[i]) || result.stringval[i] == '/') {
+		    tempstr[j++] = result.stringval[i];
+		}
+	    }
+	    tempstr[j] = '\0';
 
-            // check the current call in Tlf; if the previous local callsign isn't empty,
-            // that means the OP clean up the callsign field, so it needs to clean in Fldigi too
-            if (hiscall[0] == '\0' && thiscall[0] != '\0') {
-                thiscall[0] = '\0';
-                rc = fldigi_xmlrpc_query(&result, &env, "log.set_call", "s", "");
-                if (rc != 0) {
-                    return -1;
-                }
-            }
-            // otherways, fill the callsign field in Tlf
-            else {
-                if (strlen(tempstr) >= 3) {
-                    if (hiscall[0] == '\0') {
-                        strcpy(hiscall, tempstr);
-                        hiscall[strlen(tempstr)] = '\0';
-                        strcpy(thiscall, hiscall);
-                        hiscall_filled = 1;
-                        printcall();
-                    }
-                }
-            }
-        }
-        free((void *)result.stringval);
-        if (result.byteval != NULL) {
-            free((void *)result.byteval);
-        }
+	    // check the current call in Tlf; if the previous local callsign isn't empty,
+	    // that means the OP clean up the callsign field, so it needs to clean in Fldigi too
+	    if (hiscall[0] == '\0' && thiscall[0] != '\0') {
+		thiscall[0] = '\0';
+		rc = fldigi_xmlrpc_query(&result, &env, "log.set_call", "s", "");
+		if (rc != 0) {
+		    return -1;
+		}
+	    }
+	    // otherways, fill the callsign field in Tlf
+	    else {
+		if (strlen(tempstr) >= 3) {
+		    if (hiscall[0] == '\0') {
+			strcpy(hiscall, tempstr);
+			hiscall[strlen(tempstr)] = '\0';
+			strcpy(thiscall, hiscall);
+			hiscall_filled = 1;
+			printcall();
+		    }
+		}
+	    }
+	}
+	free((void *)result.stringval);
+	if (result.byteval != NULL) {
+	    free((void *)result.byteval);
+	}
     }
 #endif
     return 0;
@@ -583,42 +581,41 @@ int fldigi_get_log_serial_number() {
 
     rc = fldigi_xmlrpc_query(&result, &env, "log.get_exchange", "");
     if (rc != 0) {
-        return -1;
-    }
-    else {
-        if (result.stringval != NULL) {
-            j = 0;
-            // accept only alphanumeric chars
-            for(i=0; i<20 && result.stringval[i] != '\0'; i++) {
-                if (isalnum(result.stringval[i])) {
-                    tempstr[j++] = result.stringval[i];
-                }
-            }
-            tempstr[j] = '\0';
+	return -1;
+    } else {
+	if (result.stringval != NULL) {
+	    j = 0;
+	    // accept only alphanumeric chars
+	    for (i = 0; i < 20 && result.stringval[i] != '\0'; i++) {
+		if (isalnum(result.stringval[i])) {
+		    tempstr[j++] = result.stringval[i];
+		}
+	    }
+	    tempstr[j] = '\0';
 
-            // if the previous exchange isn't empty, but the current value is it,
-            // that means the OP cleaned up the field, so we need to clean up it in Fldigi
-            if (comment[0] == '\0' && tcomment[0] != '\0') {
-                tcomment[0] = '\0';
-                rc = fldigi_xmlrpc_query(&result, &env, "log.set_exchange", "s", "");
-                if (rc != 0) {
-                    return -1;
-                }
-            }
-            // otherways we need to fill the Tlf exchange field
-            else {
-                if (strlen(tempstr) > 0 && comment[0] == '\0') {
-                    strcpy(comment, tempstr);
-                    comment[strlen(tempstr)] = '\0';
-                    strcpy(tcomment, comment);
-                    refresh_comment();
-                }
-            }
-        }
-        free((void *)result.stringval);
-        if (result.stringval != NULL) {
-            free((void *)result.byteval);
-        }
+	    // if the previous exchange isn't empty, but the current value is it,
+	    // that means the OP cleaned up the field, so we need to clean up it in Fldigi
+	    if (comment[0] == '\0' && tcomment[0] != '\0') {
+		tcomment[0] = '\0';
+		rc = fldigi_xmlrpc_query(&result, &env, "log.set_exchange", "s", "");
+		if (rc != 0) {
+		    return -1;
+		}
+	    }
+	    // otherways we need to fill the Tlf exchange field
+	    else {
+		if (strlen(tempstr) > 0 && comment[0] == '\0') {
+		    strcpy(comment, tempstr);
+		    comment[strlen(tempstr)] = '\0';
+		    strcpy(tcomment, comment);
+		    refresh_comment();
+		}
+	    }
+	}
+	free((void *)result.stringval);
+	if (result.stringval != NULL) {
+	    free((void *)result.byteval);
+	}
     }
 #endif
     return 0;

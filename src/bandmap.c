@@ -42,7 +42,7 @@
 #define SPOT_COLUMN_WIDTH 22
 #define SPOT_FREQ_WIDTH 7
 #define SPOT_CALL_WIDTH SPOT_COLUMN_WIDTH-SPOT_FREQ_WIDTH-4
-				/* 3 space before and 1 after call */
+/* 3 space before and 1 after call */
 
 
 const unsigned int bandcorner[NBANDS][2] = {

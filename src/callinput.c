@@ -201,7 +201,7 @@ int callinput(void) {
 		 */
 		if (hiscall_filled == 1 && freqstore == 0) {
 		    freqstore = freq;
-		    showinfo( getctydata(hiscall) );
+		    showinfo(getctydata(hiscall));
 		    searchlog(hiscall);
 		}
 	    }
@@ -953,7 +953,7 @@ int callinput(void) {
 		double f = grab_next();
 		if (f > 0.0) {
 		    grab.state = IN_PROGRESS;
-		    grab.spotfreq = f/1000.;
+		    grab.spotfreq = f / 1000.;
 		    attron(COLOR_PAIR(C_HEADER) | A_STANDOUT);
 		    mvprintw(0, 2, "%s", mode);
 		    freqstore = 0;
@@ -967,7 +967,7 @@ int callinput(void) {
 		double f = grabspot();
 		if (f > 0.0) {
 		    grab.state = IN_PROGRESS;
-		    grab.spotfreq = f/1000.;
+		    grab.spotfreq = f / 1000.;
 		    attron(COLOR_PAIR(C_HEADER) | A_STANDOUT);
 		    mvprintw(0, 2, "%s", mode);
 		    freqstore = 0;

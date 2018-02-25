@@ -1138,8 +1138,8 @@ int parse_logcfg(char *inputbuffer) {
 
 	    int counter = 0;
 	    static char country_list_raw[50] = ""; 	/* use only first
-						       COUNTRY_LIST
-						       definition */
+						   COUNTRY_LIST
+						   definition */
 	    char temp_buffer[255] = "";
 	    char buffer[255] = "";
 	    FILE *fp;
@@ -1507,10 +1507,9 @@ int parse_logcfg(char *inputbuffer) {
 		qtcdirection = RECV;
 	    }
 	    if (strncmp(fields[1], "SEND", 4) == 0) {
-	        qtcdirection = SEND;
-	    }
-	    else if (strncmp(fields[1], "BOTH", 4) == 0) {
-	        qtcdirection = RECV | SEND;
+		qtcdirection = SEND;
+	    } else if (strncmp(fields[1], "BOTH", 4) == 0) {
+		qtcdirection = RECV | SEND;
 	    }
 	    if (qtcdirection == 0) {
 		KeywordNotSupported(teststring);
@@ -1539,8 +1538,8 @@ int parse_logcfg(char *inputbuffer) {
 
 	    int counter = 0;
 	    static char cont_multiplier_list[50] = ""; 	/* use only first
-						       CONTINENT_LIST
-						       definition */
+						   CONTINENT_LIST
+						   definition */
 	    char temp_buffer[255] = "";
 	    char buffer[255] = "";
 	    FILE *fp;
