@@ -26,6 +26,7 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <glib.h>
+#include <ctype.h>
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -60,15 +61,15 @@ typedef struct xmlrpc_res_s {
 #define MAXSHIFT 20		/* max shift value in Fldigi, when Tlf set
 				   it back to RIG carrier */
 
-#ifdef HAVE_LIBHAMLIB
-extern RIG *my_rig;
-#endif
-
 extern char fldigi_url[50];
+extern int hiscall_filled;
 
 int fldigi_var_carrier = 0;
 int fldigi_var_shift_freq = 0;
 static int initialized = 0;
+
+char thiscall[20] = "";
+char tcomment[20] = "";
 
 pthread_mutex_t xmlrpc_mutex = PTHREAD_MUTEX_INITIALIZER;
 
@@ -83,8 +84,13 @@ pthread_mutex_t xmlrpc_mutex = PTHREAD_MUTEX_INITIALIZER;
 modem.get_carrier       i:n  - get carrier of modem
 modem.set_carrier       i:i  - set carrier of modem
   log.get_call          s:n  - Returns the Call field contents
+  log.set_call          n:s  - Sets the Call field contents
   log.get_serial_number s:n  - Returns the serial number field contents
   rig.set_frequency     d:d  - Sets the RF carrier frequency. Returns the old value
+  log.get_exchange      s:n  - Returns the contest exchange field contents
+  log.set_exchange      n:s  - Sets the contest exchange field contents
+  rig.set_modes         n:A  - Sets the list of available rig modes
+  rig.set_mode          n:s  - Selects a mode previously added by rig.set_modes
 
 
  // other usable functions
@@ -175,11 +181,14 @@ int fldigi_xmlrpc_query(xmlrpc_res * local_result, xmlrpc_env * local_env,
 	    connerrcnt++;
 	}
     }
+    else {
+        connerrcnt = 0;
+    }
 
     local_result->stringval = NULL;
     local_result->byteval = NULL;
 
-    if (connerr == 0) {
+    if (connerr == 0 && connerrcnt == 0) {
 	va_start(argptr, format);
 
 	xmlrpc_env_init(local_env);
@@ -273,12 +282,11 @@ int fldigi_xmlrpc_query(xmlrpc_res * local_result, xmlrpc_env * local_env,
 
 	xmlrpc_DECREF(pcall_array);
     }
+    pthread_mutex_unlock( &xmlrpc_mutex );
     if (connerr == 0) {
-	pthread_mutex_unlock( &xmlrpc_mutex );
 	return 0;
     }
     else {
-	pthread_mutex_unlock( &xmlrpc_mutex );
 	return -1;
     }
 }
@@ -296,6 +304,7 @@ void fldigi_to_rx() {
 #endif
 }
 
+/* send message to Fldigi TX window, transmit it */
 int fldigi_send_text(char * line) {
     int rc = 0;
 
@@ -303,11 +312,14 @@ int fldigi_send_text(char * line) {
     xmlrpc_res result;
     xmlrpc_env env;
 
+    // check the RX/TX status
     rc = fldigi_xmlrpc_query(&result, &env, "main.get_trx_state", "");
     if (rc != 0) {
 	return -1;
     }
 
+    // if state is TX, stop it
+    // if the RX success, clear the previous message from TX text window
     if (strcmp(result.stringval, "TX") == 0) {
 	free((void *)result.stringval);
 	rc = fldigi_xmlrpc_query(&result, &env, "main.rx", "");
@@ -324,6 +336,7 @@ int fldigi_send_text(char * line) {
 	free((void *)result.stringval);
     }
 
+    // add message to
     rc = fldigi_xmlrpc_query(&result, &env, "text.add_tx", "s", line);
     if (rc != 0) {
 	return -1;
@@ -347,7 +360,7 @@ int fldigi_send_text(char * line) {
     return rc;
 }
 
-
+/* read the text from Fldigi's RX window, from last read position */
 int fldigi_get_rx_text(char * line) {
 #ifdef HAVE_LIBXMLRPC
     int rc;
@@ -393,35 +406,8 @@ int fldigi_get_rx_text(char * line) {
 
 }
 
-int fldigi_get_tx_text(char * line) {
-#ifdef HAVE_LIBXMLRPC
-    int rc;
-    xmlrpc_res result;
-    xmlrpc_env env;
-    line[0] = '\0';
-
-    xmlrpc_res_init(&result);
-
-    rc = fldigi_xmlrpc_query(&result, &env, "tx.get_data", "");
-    if (rc != 0) {
-        return -1;
-    }
-    else {
-        if (result.intval > 0 && result.byteval != NULL) {
-            line[0] = '\0';
-            memcpy(line, result.byteval, result.intval);
-            line[result.intval] = '\0';
-        }
-        if (result.byteval != NULL) {
-            free((void *)result.byteval);
-        }
-    }
-#endif
-    return 0;
-}
-
+/* get the carrier value of Fldigi waterfall window */
 int fldigi_xmlrpc_get_carrier() {
-
 #ifndef HAVE_LIBXMLRPC
     return 0;
 #else
@@ -434,6 +420,7 @@ int fldigi_xmlrpc_get_carrier() {
     xmlrpc_env env;
     int signum;
     int modeshift;
+    char fldigi_mode[6] = "";
 
     rc = fldigi_xmlrpc_query(&result, &env, "modem.get_carrier", "");
     if (rc != 0) {
@@ -442,6 +429,9 @@ int fldigi_xmlrpc_get_carrier() {
 
     fldigi_var_carrier = (int)result.intval;
 
+/* if mode == RTTY(R), and Hamlib configured, set VFO to new freq where the signal
+ * will placed on 2210 Hz - the FSK center freq
+ */
 #ifdef HAVE_LIBHAMLIB
     if (trx_control > 0) {
 	if (rigmode == RIG_MODE_RTTY || rigmode == RIG_MODE_RTTYR) {
@@ -459,34 +449,52 @@ int fldigi_xmlrpc_get_carrier() {
 	    }
 	}
 
-	rc = fldigi_xmlrpc_query(&result, &env,
-                "rig.set_frequency", "f",
-                (xmlrpc_double) freq);
-        if (rc != 0) {
-            return -1;
-        }
-
         if (rigmode != RIG_MODE_NONE) {
 	    switch (rigmode) {
 		case RIG_MODE_USB:	signum = 1;
-					modeshift = 0;
+					modeshift = 85;
+					strcpy(fldigi_mode, "USB");
 					break;
 		case RIG_MODE_LSB:	signum = -1;
-					modeshift = 0;
+					modeshift = 85;
+					strcpy(fldigi_mode, "LSB");
 					break;
 		case RIG_MODE_RTTY:	signum = 0;
-					modeshift = -100; // on my TS850, in FSK mode, the QRG is differ by 100Hz up
-							  // possible need to check in other rigs
 					modeshift = 0;
+					strcpy(fldigi_mode, "RTTY");
 					break;
-		case RIG_MODE_RTTYR:	signum = 0;	// not checked - I don't have RTTY-REV mode on my RIG
-					modeshift = -100;
-					break;
-		default:		signum = 0;	// this is the "normal"
+		case RIG_MODE_RTTYR:	signum = -1;	// not checked - I don't have RTTY-REV mode on my RIG
 					modeshift = 0;
+					strcpy(fldigi_mode, "RTTYR");
+					break;
+		case RIG_MODE_CW:	signum = 0;
+					modeshift = 0;
+					strcpy(fldigi_mode, "CW");
+					break;
+		case RIG_MODE_CWR:	signum = -1;	// not checked - I don't have CW-REV mode on my RIG
+					modeshift = 0;
+					strcpy(fldigi_mode, "CWR");
+					break;
+                default:		signum = 0;	// this is the "normal"
+					modeshift = 0;
+					strcpy(fldigi_mode, "CW");
 	    }
+
+	    /* set the mode in Fldigi */
+            rc = fldigi_xmlrpc_query(&result, &env, "rig.set_mode", "s", fldigi_mode);
+            if (rc != 0) {
+                return -1;
+            }
 	    fldigi_var_carrier = ((signum)*fldigi_var_carrier)+modeshift;
-	}
+
+            /* also set the freq value in Fldigi FREQ block */
+	    rc = fldigi_xmlrpc_query(&result, &env,
+                    "rig.set_frequency", "f",
+                    (xmlrpc_double) ((freq*1000.0)-(fldigi_var_carrier)));
+            if (rc != 0) {
+                return -1;
+            }
+        }
     }
 #endif
     return 0;
@@ -494,6 +502,7 @@ int fldigi_xmlrpc_get_carrier() {
 
 }
 
+/* give back the crrent carrier value, which stored in variable */
 int fldigi_get_carrier() {
 #ifdef HAVE_LIBXMLRPC
         return fldigi_var_carrier;
@@ -502,34 +511,7 @@ int fldigi_get_carrier() {
 #endif
 }
 
-int fldigi_get_rxtx_state() {
-#ifdef HAVE_LIBXMLRPC
-    int rc;
-    xmlrpc_res result;
-    xmlrpc_env env;
-
-    xmlrpc_res_init(&result);
-
-    rc = fldigi_xmlrpc_query(&result, &env, "main.get_trx_state", "");
-    if (rc != 0) {
-        return -1;
-    }
-    else {
-        if (strcmp(result.stringval, "TX") == 0) {
-            fldigi_ptt = FLDIGI_TX;
-        }
-        else {
-            fldigi_ptt = FLDIGI_RX;
-        }
-        free((void *)result.stringval);
-        if (result.byteval != NULL) {
-            free((void *)result.byteval);
-        }
-    }
-#endif
-    return 0;
-}
-
+/* read callsign field in Fldigi, and sets the CALL in Tlf */
 int fldigi_get_log_call() {
 #ifdef HAVE_LIBXMLRPC
     int rc;
@@ -540,7 +522,8 @@ int fldigi_get_log_call() {
 
     extern char hiscall[];
     char tempstr[20];
-    int i;
+    int i, j;
+
 
     rc = fldigi_xmlrpc_query(&result, &env, "log.get_call", "");
     if (rc != 0) {
@@ -548,15 +531,36 @@ int fldigi_get_log_call() {
     }
     else {
         if (result.stringval != NULL) {
+            j = 0;
+            // accept only alphanumeric chars and '/' in callsign
+            // in case of QRM, there are many several metachar
             for(i=0; i<20 && result.stringval[i] != '\0'; i++) {
-                tempstr[i] = result.stringval[i];
+                if (isalnum(result.stringval[i]) || result.stringval[i] == '/') {
+                    tempstr[j++] = result.stringval[i];
+                }
             }
-            tempstr[i] = '\0';
-            g_strchomp(tempstr);
-            if (strlen(tempstr) > 3 && strcmp(tempstr, hiscall) != 0) {
-                strcpy(hiscall, tempstr);
-                hiscall[strlen(tempstr)] = '\0';
-                printcall();
+            tempstr[j] = '\0';
+
+            // check the current call in Tlf; if the previous local callsign isn't empty,
+            // that means the OP clean up the callsign field, so it needs to clean in Fldigi too
+            if (hiscall[0] == '\0' && thiscall[0] != '\0') {
+                thiscall[0] = '\0';
+                rc = fldigi_xmlrpc_query(&result, &env, "log.set_call", "s", "");
+                if (rc != 0) {
+                    return -1;
+                }
+            }
+            // otherways, fill the callsign field in Tlf
+            else {
+                if (strlen(tempstr) >= 3) {
+                    if (hiscall[0] == '\0') {
+                        strcpy(hiscall, tempstr);
+                        hiscall[strlen(tempstr)] = '\0';
+                        strcpy(thiscall, hiscall);
+                        hiscall_filled = 1;
+                        printcall();
+                    }
+                }
             }
         }
         free((void *)result.stringval);
@@ -568,6 +572,7 @@ int fldigi_get_log_call() {
     return 0;
 }
 
+/* read exchange field in Fldigi, and sets that in Tlf */
 int fldigi_get_log_serial_number() {
 #ifdef HAVE_LIBXMLRPC
     int rc;
@@ -578,23 +583,40 @@ int fldigi_get_log_serial_number() {
 
     extern char comment[];
     char tempstr[20];
-    int i;
+    int i, j;
 
-    rc = fldigi_xmlrpc_query(&result, &env, "log.get_serial_number", "");
+    rc = fldigi_xmlrpc_query(&result, &env, "log.get_exchange", "");
     if (rc != 0) {
         return -1;
     }
     else {
         if (result.stringval != NULL) {
+            j = 0;
+            // accept only alphanumeric chars
             for(i=0; i<20 && result.stringval[i] != '\0'; i++) {
-                tempstr[i] = result.stringval[i];
+                if (isalnum(result.stringval[i])) {
+                    tempstr[j++] = result.stringval[i];
+                }
             }
-            tempstr[i] = '\0';
-            g_strchomp(tempstr);
-            if (strlen(tempstr) > 0 && strcmp(tempstr, comment) != 0) {
-                strcpy(comment, tempstr);
-                comment[strlen(tempstr)] = '\0';
-                refresh_comment();
+            tempstr[j] = '\0';
+
+            // if the previous exchange isn't empty, but the current value is it,
+            // that means the OP cleaned up the field, so we need to clean up it in Fldigi
+            if (comment[0] == '\0' && tcomment[0] != '\0') {
+                tcomment[0] = '\0';
+                rc = fldigi_xmlrpc_query(&result, &env, "log.set_exchange", "s", "");
+                if (rc != 0) {
+                    return -1;
+                }
+            }
+            // otherways we need to fill the Tlf exchange field
+            else {
+                if (strlen(tempstr) > 0 && comment[0] == '\0') {
+                    strcpy(comment, tempstr);
+                    comment[strlen(tempstr)] = '\0';
+                    strcpy(tcomment, comment);
+                    refresh_comment();
+                }
             }
         }
         free((void *)result.stringval);
@@ -619,7 +641,6 @@ int fldigi_get_shift_freq() {
         return 0;
 #endif
 }
-
 
 void xmlrpc_showinfo() {
 #ifdef HAVE_LIBXMLRPC		// Show xmlrpc status

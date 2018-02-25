@@ -40,7 +40,6 @@
 #include "tlf.h"
 #include "tlf_curses.h"
 #include "write_keyer.h"
-#include "serialmodem.h"
 #include "qtcvars.h"
 
 
@@ -117,81 +116,19 @@ void *background_process(void *ptr)
 	 * it readable by fldigi_get_carrier()
 	 * only need at every 2nd cycle
 	 * see fldigixmlrpc.[ch]
+	 *
+	 * Here are two addition routines
+	 *   fldigi_get_log_call() reads the callsign, if user clicks to a string in Fldigi's RX window
+	 *   fldigi_get_log_serial_number() reads the exchange
 	 */
 	if (trxmode == DIGIMODE && (digikeyer == GMFSK || digikeyer == FLDIGI)
 		&& trx_control == 1) {
 	    if (fldigi_rpc_cnt == 0) {
 		fldigi_xmlrpc_get_carrier();
+                fldigi_get_log_call();
+                fldigi_get_log_serial_number();
 	    }
 	    fldigi_rpc_cnt = 1 - fldigi_rpc_cnt;
-
-            if (fldigi_get_log_call() != 0) {
-                mvprintw(24, 0,
-                    "Warning: Fldigi error!");
-                refreshp();
-                sleep(5);
-            }
-
-            if (fldigi_get_log_serial_number() != 0) {
-                mvprintw(24, 0,
-                    "Warning: Fldigi error!");
-                refreshp();
-                sleep(5);
-            }
-
-            if (digikeyer == FLDIGI && fldigi_fsk == 1) {
-
-                if (fldigi_get_rxtx_state() != 0) {
-                    mvprintw(24, 0,
-                        "Warning: Fldigi error!");
-                    refreshp();
-                    sleep(5);
-                }
-                if (fldigi_ptt == FLDIGI_TX) {
-                    if (fldigi_ptt_last == FLDIGI_RX) {
-                        if (serial_write('[') <= 0) {
-                            mvprintw(24, 0,
-                                "Warning: FSK write error!");
-                            refreshp();
-                            sleep(5);
-                        }
-                        fldigi_ptt_last = FLDIGI_TX;
-                    }
-                    if (fldigi_get_tx_text(fldigi_tx_line) != 0) {
-                        mvprintw(24, 0,
-                            "Warning: Fldigi error!");
-                        refreshp();
-                        sleep(5);
-                    }
-                    if (strlen(fldigi_tx_line) > 0) {
-                        for(f=0; f < strlen(fldigi_tx_line); f++) {
-                            if (serial_write(fldigi_tx_line[f]) <= 0) {
-                                mvprintw(24, 0,
-                                    "Warning: FSK write error!");
-                                refreshp();
-                                sleep(5);
-                            }
-                        }
-                    }
-                }
-                if (fldigi_get_rxtx_state() != 0) {
-                    mvprintw(24, 0,
-                        "Warning: Fldigi error!");
-                    refreshp();
-                    sleep(5);
-                }
-                if (fldigi_ptt == FLDIGI_RX) {
-                    if (fldigi_ptt_last == FLDIGI_TX) {
-                        if (serial_write(']') <= 0) {
-                            mvprintw(24, 0,
-                                "Warning: FSK write error!");
-                            refreshp();
-                            sleep(5);
-                        }
-                        fldigi_ptt_last = FLDIGI_RX;
-                    }
-                }
-            }
 	}
 
 	if (stop_backgrnd_process == 0) {

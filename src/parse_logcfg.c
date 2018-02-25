@@ -37,7 +37,6 @@
 #include "setcontest.h"
 #include "startmsg.h"
 #include "tlf_curses.h"
-#include "serialmodem.h"
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -70,7 +69,7 @@ void KeywordNotSupported(char *keyword);
 void ParameterNeeded(char *keyword);
 void WrongFormat(char *keyword);
 
-#define  MAX_COMMANDS 238	/* commands in list */
+#define  MAX_COMMANDS 237	/* commands in list */
 
 
 int read_logcfg(void)
@@ -300,8 +299,6 @@ int parse_logcfg(char *inputbuffer)
     extern int bmautograb;
     extern int sprint_mode;
     extern char fldigi_url[50];
-    extern char fldigi_modem[20];
-    extern int fldigi_fsk;
     extern unsigned char rigptt;
     extern int minitest;
     extern int unique_call_multi;
@@ -544,8 +541,7 @@ int parse_logcfg(char *inputbuffer)
 	"RIGPTT",
 	"MINITEST",
 	"UNIQUE_CALL_MULTI",		/* 235 */
-        "KEYER_BACKSPACE",
-        "FLDIGI_MODEM"
+        "KEYER_BACKSPACE"
     };
 
     char **fields;
@@ -1880,25 +1876,6 @@ int parse_logcfg(char *inputbuffer)
     }
     case 236: { // KEYER_BACKSPACE
 	    keyer_backspace = 1;
-	    break;
-    }
-    case 237: { // FLDIGI_MODEM
-#ifndef HAVE_LIBXMLRPC
-	    showmsg ("WARNING: XMLRPC not compiled - skipping setup.");
-	    sleep(2);
-#else
-	    if (fields[1] != NULL) {
-		g_strlcpy(fldigi_modem, g_strchomp(fields[1]),
-			sizeof(fldigi_modem));
-	    }
-	    fldigi_fsk = 1;
-	    if (serial_init() != 0) {
-		showmsg
-			("WARNING: can't open serial port for FSK modem");
-		    sleep(2);
-		    exit(1);
-	    }
-#endif
 	    break;
     }
     default: {

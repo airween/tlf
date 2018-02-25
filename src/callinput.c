@@ -71,7 +71,6 @@
 #include "showzones.h"
 
 #include <math.h>
-
 #ifdef HAVE_CONFIG_H
 # include <config.h>
 #endif
@@ -149,6 +148,7 @@ char callinput(void)
 
     extern int bmautoadd;
     extern int bmautograb;
+    extern int hiscall_filled;
 
     static float freqstore;		/* qrg during last callsign input
 					   character, 0 if grabbed,
@@ -195,6 +195,15 @@ char callinput(void)
 
 	    if (trxmode == DIGIMODE) {
 		show_rtty();
+		/*
+		 * in case of RTTY, the callsign would filled by Fldigi
+		 * this part handles that event
+		 */
+		if (hiscall_filled == 1 && freqstore == 0) {
+		    freqstore = freq;
+		    showinfo( getctydata(hiscall) );
+		    searchlog(hiscall);
+		}
 	    }
 
 	    /* if BMAUTOADD is active and user has input a call sign
@@ -207,6 +216,7 @@ char callinput(void)
 			hiscall[0] = '\0';
 			HideSearchPanel();
 			freqstore = 0;
+			hiscall_filled = 0;
 		    }
 		}
 	    }
@@ -526,6 +536,8 @@ char callinput(void)
 		    cleanup();
 		    clear_display();
 		}
+		freqstore = 0;
+		hiscall_filled = 0;
 		break;
 	    }
 
@@ -903,6 +915,7 @@ char callinput(void)
 		}
 
 		freqstore = 0;
+		hiscall_filled = 0;
 		break;
 	    }
 
@@ -962,6 +975,8 @@ char callinput(void)
 
 		grab.state = REACHED;
 		grab.spotfreq = freq;
+		hiscall_filled = 0;
+		freqstore = 0;
 		break;
 	    }
 
@@ -993,6 +1008,7 @@ char callinput(void)
                     attron(COLOR_PAIR(C_HEADER) | A_STANDOUT);
                     mvprintw(0, 2, "%s", mode);
                     freqstore = 0;
+                    hiscall_filled = 0;
                 }
 
 		break;
@@ -1008,6 +1024,7 @@ char callinput(void)
                     attron(COLOR_PAIR(C_HEADER) | A_STANDOUT);
                     mvprintw(0, 2, "%s", mode);
                     freqstore = 0;
+                    hiscall_filled = 0;
                 }
 
 		break;
@@ -1128,6 +1145,7 @@ char callinput(void)
 	    refreshp();
 
 	    freqstore = freq;
+	    hiscall_filled = 1;
 
 	}
 
