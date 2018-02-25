@@ -104,7 +104,7 @@ modem.set_carrier       i:i  - set carrier of modem
 
 #ifdef HAVE_LIBXMLRPC
 xmlrpc_env env;
-xmlrpc_server_info * serverInfoP = NULL;
+xmlrpc_server_info *serverInfoP = NULL;
 #endif
 
 int fldigi_ptt;
@@ -120,7 +120,7 @@ void xmlrpc_res_init(xmlrpc_res * res) {
 int fldigi_xmlrpc_init() {
 #ifdef HAVE_LIBXMLRPC
     xmlrpc_client_init2(&env, XMLRPC_CLIENT_NO_FLAGS, NAME,
-	    XMLRPCVERSION, NULL, 0);
+			XMLRPCVERSION, NULL, 0);
     serverInfoP = xmlrpc_server_info_new(&env, fldigi_url);
     if (env.fault_occurred != 0) {
 	serverInfoP = NULL;
@@ -145,13 +145,14 @@ int fldigi_xmlrpc_cleanup() {
 }
 
 #ifdef HAVE_LIBXMLRPC
-int fldigi_xmlrpc_query(xmlrpc_res * local_result, xmlrpc_env * local_env,
-			char * methodname, char * format, ...) {
+int fldigi_xmlrpc_query(xmlrpc_res *local_result, xmlrpc_env *local_env,
+			char *methodname, char *format, ...) {
+
     static int connerr = 0;
     static unsigned int connerrcnt = 0;
-    xmlrpc_value * callresult;
-    xmlrpc_value * pcall_array = NULL;
-    xmlrpc_value * va_param = NULL;
+    xmlrpc_value *callresult;
+    xmlrpc_value *pcall_array = NULL;
+    xmlrpc_value *va_param = NULL;
     va_list argptr;
     int restype;
     size_t bytesize = 0;
@@ -161,7 +162,7 @@ int fldigi_xmlrpc_query(xmlrpc_res * local_result, xmlrpc_env * local_env,
 	return -1;
     }
 
-    pthread_mutex_lock( &xmlrpc_mutex );
+    pthread_mutex_lock(&xmlrpc_mutex);
     /*
     if connerr had been set up to 1, that means an error
     occured at last xmlrpc_call() method
@@ -176,8 +177,7 @@ int fldigi_xmlrpc_query(xmlrpc_res * local_result, xmlrpc_env * local_env,
 	if (connerrcnt == 10) {
 	    connerr = 0;
 	    connerrcnt = 0;
-	}
-	else {
+	} else {
 	    connerrcnt++;
 	}
     }
@@ -193,30 +193,29 @@ int fldigi_xmlrpc_query(xmlrpc_res * local_result, xmlrpc_env * local_env,
 
 	xmlrpc_env_init(local_env);
 	pcall_array = xmlrpc_array_new(local_env);
-	while(*format != '\0') {
-	    if(*format == 's') {
-		char* s = va_arg(argptr, char *);
+	while (*format != '\0') {
+	    if (*format == 's') {
+		char *s = va_arg(argptr, char *);
 		va_param = xmlrpc_string_new(local_env, s);
 		if (local_env->fault_occurred) {
 		    va_end(argptr);
-		    pthread_mutex_unlock( &xmlrpc_mutex );
+		    pthread_mutex_unlock(&xmlrpc_mutex);
 		    return -1;
 		}
 		xmlrpc_array_append_item(local_env, pcall_array, va_param);
 		if (local_env->fault_occurred) {
 		    va_end(argptr);
-		    pthread_mutex_unlock( &xmlrpc_mutex );
+		    pthread_mutex_unlock(&xmlrpc_mutex);
 		    return -1;
 		}
 		xmlrpc_DECREF(va_param);
-	    }
-	    else if(*format == 'd') {
+	    } else if (*format == 'd') {
 		int d = va_arg(argptr, int);
 		va_param = xmlrpc_int_new(local_env, d);
 		xmlrpc_array_append_item(local_env, pcall_array, va_param);
 		if (local_env->fault_occurred) {
 		    va_end(argptr);
-		    pthread_mutex_unlock( &xmlrpc_mutex );
+		    pthread_mutex_unlock(&xmlrpc_mutex);
 		    return -1;
 		}
 		xmlrpc_DECREF(va_param);
@@ -238,42 +237,40 @@ int fldigi_xmlrpc_query(xmlrpc_res * local_result, xmlrpc_env * local_env,
 	va_end(argptr);
 
 	callresult = xmlrpc_client_call_server_params(local_env, serverInfoP,
-		methodname, pcall_array);
+		     methodname, pcall_array);
 	if (local_env->fault_occurred) {
 	    // error till xmlrpc_call
 	    connerr = 1;
 	    xmlrpc_DECREF(pcall_array);
 	    xmlrpc_env_clean(local_env);
-	    pthread_mutex_unlock( &xmlrpc_mutex );
+	    pthread_mutex_unlock(&xmlrpc_mutex);
 	    return -1;
-	}
-	else {
+	} else {
 	    restype = xmlrpc_value_type(callresult);
 	    if (restype == 0xDEAD) {
 		xmlrpc_DECREF(callresult);
 		xmlrpc_DECREF(pcall_array);
 		xmlrpc_env_clean(local_env);
-		pthread_mutex_unlock( &xmlrpc_mutex );
+		pthread_mutex_unlock(&xmlrpc_mutex);
 		return -1;
-	    }
-	    else {
+	    } else {
 		local_result->intval = 0;
 	    }
-	    switch(restype) {
+	    switch (restype) {
 		// int
 		case XMLRPC_TYPE_INT:
 		    xmlrpc_read_int(local_env, callresult,
-			    &local_result->intval);
+				    &local_result->intval);
 		    break;
 		// string
 		case XMLRPC_TYPE_STRING:
 		    xmlrpc_read_string(local_env, callresult,
-			    &local_result->stringval);
+				       &local_result->stringval);
 		    break;
 		// byte stream
 		case XMLRPC_TYPE_BASE64:
 		    xmlrpc_read_base64(local_env, callresult,
-			    &bytesize, &local_result->byteval);
+				       &bytesize, &local_result->byteval);
 		    local_result->intval = (int)bytesize;
 		    break;
 	    }
@@ -378,11 +375,10 @@ int fldigi_get_rx_text(char * line) {
     textlen = result.intval;
     if (lastpos == 0) {
 	lastpos = textlen;
-    }
-    else {
+    } else {
 	if (lastpos < textlen) {
 	    rc = fldigi_xmlrpc_query(&result, &env, "text.get_rx", "dd",
-		    lastpos, textlen);
+				     lastpos, textlen);
 	    if (rc != 0) {
 		return -1;
 	    }
@@ -439,12 +435,12 @@ int fldigi_xmlrpc_get_carrier() {
 		    abs(CENTER_FREQ - fldigi_var_carrier) > MAXSHIFT) {
 		if (fldigi_var_shift_freq == 0) {
 		    rc = fldigi_xmlrpc_query(&result, &env,
-			    "modem.set_carrier", "d",
-			    (xmlrpc_int32) CENTER_FREQ);
+					     "modem.set_carrier", "d",
+					     (xmlrpc_int32) CENTER_FREQ);
 		    if (rc != 0) {
 			return -1;
 		    }
-		    fldigi_var_shift_freq = CENTER_FREQ-fldigi_var_carrier;
+		    fldigi_var_shift_freq = CENTER_FREQ - fldigi_var_carrier;
 		}
 	    }
 	}
@@ -505,9 +501,9 @@ int fldigi_xmlrpc_get_carrier() {
 /* give back the crrent carrier value, which stored in variable */
 int fldigi_get_carrier() {
 #ifdef HAVE_LIBXMLRPC
-        return fldigi_var_carrier;
+    return fldigi_var_carrier;
 #else
-        return 0;
+    return 0;
 #endif
 }
 
@@ -630,15 +626,15 @@ int fldigi_get_log_serial_number() {
 
 int fldigi_get_shift_freq() {
 #ifdef HAVE_LIBXMLRPC
-	int t;				/* temp var to store real variable
+    int t;				/* temp var to store real variable
 					   before cleaning it up */
-	t = fldigi_var_shift_freq;	/* clean is necessary to check that
+    t = fldigi_var_shift_freq;	/* clean is necessary to check that
 					   it readed by called this function */
-	fldigi_var_shift_freq = 0;	/* needs to keep in sync with the
+    fldigi_var_shift_freq = 0;	/* needs to keep in sync with the
 					   rig VFO */
-        return t;
+    return t;
 #else
-        return 0;
+    return 0;
 #endif
 }
 

@@ -18,10 +18,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-	/* ------------------------------------------------------------
-	 *
-	 *          parameterdialog
-	 *--------------------------------------------------------------*/
+/* ------------------------------------------------------------
+ *
+ *          parameterdialog
+ *--------------------------------------------------------------*/
 
 
 #include <ctype.h>
@@ -71,8 +71,8 @@
 
 int debug_tty(void);
 
-int changepars(void)
-{
+int changepars(void) {
+
     extern int cluster;
     extern int shortqsonr;
     extern int searchflg;
@@ -186,82 +186,67 @@ int changepars(void)
     }
 
     switch (i) {
-    case 0:			/* SPOTS) */
-	{
+	case 0: {		/* SPOTS) */
 	    /* SPOTS not supported anymore
 	     * - default to MAP*/
 	    cluster = MAP;
 	    break;
 	}
-    case 1:			/* BANDMAP */
-	{
+	case 1: {		/* BANDMAP */
 	    cluster = MAP;
 	    break;
 	}
-    case 2:			/* CLOFF  */
-	{
+	case 2: {		/* CLOFF  */
 	    cluster = NOCLUSTER;
 	    break;
 	}
-    case 3:			/* CLUSTER  */
-	{
+	case 3: {		/* CLUSTER  */
 	    cluster = CLUSTER;
 	    announcefilter = FILTER_ALL;
 	    break;
 	}
-    case 4:			/* SHORTNR  */
-	{
+	case 4: {		/* SHORTNR  */
 	    shortqsonr = SHORTCW;
 	    break;
 	}
-    case 5:			/* LONGNR  */
-	{
+	case 5: {		/* LONGNR  */
 	    shortqsonr = LONGCW;
 	    break;
 	}
-    case 6:			/* MESSAGE  */
-	{
+	case 6: {		/* MESSAGE  */
 	    message_change(i);
 	    break;
 	}
 
-    case 7:			/* LIST  */
-	{
+	case 7: {		/* LIST  */
 	    listmessages();
 	    break;
 	}
-    case 8:			/* CHECK  */
-	{
+	case 8: {		/* CHECK  */
 	    searchflg = SEARCHWINDOW;
 	    break;
 	}
-    case 9:			/* NOCHECK  */
-	{
+	case 9: {		/* NOCHECK  */
 	    searchflg = 0;
 	    break;
 	}
-    case 10:			/*  TONE   */
-	{
+	case 10: {		/*  TONE   */
 	    set_tone();
 	    break;
 	}
-    case 11:			/*  EDIT   */
-	{
+	case 11: {		/*  EDIT   */
 	    logedit();
 	    break;
 	}
-    case 12:			/*  VIEW   */
-	{
+	case 12: {		/*  VIEW   */
 	    logview();
 	    break;
 	}
-    case 13:			/*  HELP   */
-	{
+	case 13: {		/*  HELP   */
 	    show_help();
 	    break;
 	}
-    case 14:			/*  DEMODE   */
-	{
+	case 14: {		/*  DEMODE   */
 	    if (demode == SEND_DE)
 		demode = 0;
 	    else
@@ -272,8 +257,7 @@ int changepars(void)
 
 	    break;
 	}
-    case 15:			/*  CONTEST   */
-	{
+	case 15: {		/*  CONTEST   */
 	    if (contest == CONTEST)
 		contest = 0;
 	    else {
@@ -286,8 +270,7 @@ int changepars(void)
 
 	    break;
 	}
-    case 16:			/*  FILTER   */
-	{
+	case 16: {		/*  FILTER   */
 	    announcefilter++;
 	    if (announcefilter > 3)
 		announcefilter = 0;
@@ -297,8 +280,7 @@ int changepars(void)
 
 	    break;
 	}
-    case 17:			/*  SCORE   */
-	{
+	case 17: {		/*  SCORE   */
 	    if (showscore_flag == 0)
 		showscore_flag = 1;
 	    else {
@@ -311,8 +293,7 @@ int changepars(void)
 
 	    break;
 	}
-    case 18:			/*  WRITE CABRILLO FILE   */
-	{
+	case 18: {		/*  WRITE CABRILLO FILE   */
 	    int old_cluster = cluster;
 	    cluster = NOCLUSTER;
 
@@ -323,9 +304,8 @@ int changepars(void)
 
 	    break;
 	}
-    case 19:			/* EXIT */
-    case 38:			/* QUIT */
-	{
+	case 19:			/* EXIT */
+	case 38: {		/* QUIT */
 	    writeparas();
 	    clear();
 	    cleanup_telnet();
@@ -334,12 +314,10 @@ int changepars(void)
 	    exit(0);
 	    break;
 	}
-    case 20:			/*  TXFILE   */
-	{
+	case 20: {		/*  TXFILE   */
 	    break;
 	}
-    case 21:			/*  ZONES   */
-	{
+	case 21: {		/*  ZONES   */
 	    if (zonedisplay == 0)
 		zonedisplay = 1;
 	    else {
@@ -349,16 +327,14 @@ int changepars(void)
 
 	    break;
 	}
-    case 22:			/* COUNTRIES */
-	{
+	case 22: {		/* COUNTRIES */
 	    show_mults();
 	    refreshp();
 	    sleep(1);
 
 	    break;
 	}
-    case 23:			/*  MODE   */
-	{
+	case 23: {		/*  MODE   */
 	    if (trxmode == CWMODE)
 		trxmode = SSBMODE;
 	    else if (trxmode == SSBMODE)
@@ -377,9 +353,8 @@ int changepars(void)
 
 	    break;
 	}
-    case 24:			/* SET PARAMETERS */
-    case 29:			/* CFG PARAMETERS */
-	{
+	case 24:			/* SET PARAMETERS */
+	case 29: {		/* CFG PARAMETERS */
 	    clear();
 	    if (editor == EDITOR_JOE) {
 		strcpy(cmdstring, "joe ");
@@ -402,20 +377,17 @@ int changepars(void)
 	    clear_display();
 	    break;
 	}
-    case 25:			/*  MULTI   */
-	{
+	case 25: {		/*  MULTI   */
 	    multiplierinfo();
 
 	    break;
 	}
-    case 26:			/* PROPAGATION */
-	{
+	case 26: {		/* PROPAGATION */
 	    muf();
 	    clear_display();
 	    break;
 	}
-    case 27:			/*  RITCLEAR   */
-	{
+	case 27: {		/*  RITCLEAR   */
 	    if (rit == RITCLEAR)
 		rit = 0;
 	    else {
@@ -432,8 +404,7 @@ int changepars(void)
 
 	    break;
 	}
-    case 28:			/*  trx ctl   */
-	{
+	case 28: {		/*  trx ctl   */
 	    if (trx_control == 1)
 		trx_control = 0;
 	    else {
@@ -450,35 +421,30 @@ int changepars(void)
 
 	    break;
 	}
-    case 30:			/* CW  */
-    case 49:
-	{
+	case 30:			/* CW  */
+	case 49: {
 	    if (cwkeyer == MFJ1278_KEYER) {
 		sendmessage("MODE CW\015K\015");
 	    }
 	    trxmode = CWMODE;
-            set_outfreq(SETCWMODE);
+	    set_outfreq(SETCWMODE);
 	    break;
 	}
-    case 31:			/* SSBMODE  */
-	{
+	case 31: {		/* SSBMODE  */
 	    trxmode = SSBMODE;
-            set_outfreq(SETSSBMODE);
+	    set_outfreq(SETSSBMODE);
 	    break;
 	}
-    case 32:			/* DIGIMODE  */
-	{
+	case 32: {		/* DIGIMODE  */
 	    trxmode = DIGIMODE;
 	    break;
 	}
-    case 33:			/* PACKET  */
-	{
+	case 33: {		/* PACKET  */
 	    if ((nopacket == 0) && (packetinterface > 0))
 		packet();
 	    break;
 	}
-    case 34:			/* SIMULATOR  */
-	{
+	case 34: {		/* SIMULATOR  */
 	    if (simulator == 0) {
 		simulator = 1;
 		if (ctcomp == 1) {
@@ -517,8 +483,7 @@ int changepars(void)
 	    }
 	    break;
 	}
-    case 35:			/* INFO  */
-	{
+	case 35: {		/* INFO  */
 	    int currentterm = miniterm;
 	    miniterm = 0;
 	    networkinfo();
@@ -528,14 +493,12 @@ int changepars(void)
 		trxmode = DIGIMODE;
 	    break;
 	}
-    case 36:			/* CLOFF  */
-	{
+	case 36: {		/* CLOFF  */
 	    cluster = FREQWINDOW;
 	    break;
 	}
 
-    case 37:			/* RECONNECT  */
-	{
+	case 37: {		/* RECONNECT  */
 	    if ((nopacket == 0) && (packetinterface > 0)) {
 		cleanup_telnet();
 		init_packet();
@@ -544,8 +507,7 @@ int changepars(void)
 	    break;
 	}
 
-    case 39:			/* CQDELAY */
-	{
+	case 39: {		/* CQDELAY */
 	    mvprintw(12, 29, "CQD: pgup/dwn", cqdelay);
 	    refreshp();
 
@@ -555,9 +517,8 @@ int changepars(void)
 
 		switch (x) {
 
-		// <Page-Up>, increase autoCQ delay by 1/2 second.
-		case KEY_PPAGE:
-		    {
+		    // <Page-Up>, increase autoCQ delay by 1/2 second.
+		    case KEY_PPAGE: {
 			if (cqdelay <= 60) {
 			    cqdelay++;
 			    attron(COLOR_PAIR(C_HEADER) | A_STANDOUT);
@@ -568,9 +529,8 @@ int changepars(void)
 			}
 		    }
 
-		// <Page-Down>, decrease autoCQ delay by 1/2 second.
-		case KEY_NPAGE:
-		    {
+		    // <Page-Down>, decrease autoCQ delay by 1/2 second.
+		    case KEY_NPAGE: {
 			if (cqdelay >= 1) {
 			    cqdelay--;
 			    attron(COLOR_PAIR(C_HEADER) | A_STANDOUT);
@@ -580,9 +540,9 @@ int changepars(void)
 			    break;
 
 			}
-		default:
-			x = 0;
-		    }
+			default:
+			    x = 0;
+			}
 
 		}
 	    }
@@ -593,14 +553,12 @@ int changepars(void)
 	    break;
 
 	}
-    case 40:			/* ADIF */
-	{
+	case 40: {		/* ADIF */
 	    write_adif();
 
 	    break;
 	}
-    case 41:			/* SYNC */
-	{
+	case 41: {		/* SYNC */
 	    if (strlen(synclogfile) > 0)
 		synclog(synclogfile);
 	    scroll_log();
@@ -613,8 +571,7 @@ int changepars(void)
 	    clear_display();
 	    break;
 	}
-    case 42:			/* RESCORE */
-	{
+	case 42: {		/* RESCORE */
 	    /** \todo register return value */
 	    total = 0;
 	    readcalls();
@@ -624,8 +581,7 @@ int changepars(void)
 	    clear_display();
 	    break;
 	}
-    case 43:			/* SCVOLUME - set soundcard volume */
-	{
+	case 43: {		/* SCVOLUME - set soundcard volume */
 	    volumebuffer = atoi(sc_volume);
 	    mvprintw(12, 29, "Vol: pgup/dwn");
 	    refreshp();
@@ -639,23 +595,21 @@ int changepars(void)
 
 		switch (x) {
 
-		// <Page-Up>, increase volume by 5%.
-		case KEY_PPAGE:
-		    {
+		    // <Page-Up>, increase volume by 5%.
+		    case KEY_PPAGE: {
 			if (volumebuffer < 95)
 			    volumebuffer += 5;
 
 			break;
 		    }
-		// <Page-Down>, decrease volume by 5%.
-		case KEY_NPAGE:
-		    {
+		    // <Page-Down>, decrease volume by 5%.
+		    case KEY_NPAGE: {
 			if (volumebuffer >= 5)
 			    volumebuffer -= 5;
 
 			break;
 		    }
-		default:
+		    default:
 			x = 0;
 
 		}
@@ -673,8 +627,7 @@ int changepars(void)
 	    clear_display();
 	    break;
 	}
-    case 44:			/* SCAN */
-	{
+	case 44: {		/* SCAN */
 	    int currentterm = miniterm;
 	    miniterm = 0;
 	    testaudio();
@@ -682,42 +635,37 @@ int changepars(void)
 	    miniterm = currentterm;
 	    break;
 	}
-    case 45:			/* DEBUG */
-	{
+	case 45: {		/* DEBUG */
 	    debug_tty();
 	    clear_display();
 	    break;
 	}
-    case 46:			/* MINITERM ON/OFF */
-	{
+	case 46: {		/* MINITERM ON/OFF */
 	    if (miniterm == 1)
 		miniterm = 0;
 	    else
 		miniterm = 1;
 	    break;
 	}
-    case 47:			/* RTTY Initialize mode (MFJ1278B controller) */
-	{
+	case 47: {		/* RTTY Initialize mode (MFJ1278B controller) */
 	    sendmessage("MODE VB\015K\015");
 	    trxmode = DIGIMODE;
 
 	    break;
 	}
-    case 48:			/* SOUND */
-	{
+	case 48: {		/* SOUND */
 	    clear_display();
 	    record();
 	    clear_display();
 	    break;
 	}
-    case 50:			/* CHARS */
-	{
+	case 50: {		/* CHARS */
 	    mvprintw(13, 29, "Autosend: (0, 2..5, m)?");
 	    refreshp();
 	    x = 1;
 
 	    /* wait for correct input or ESC */
-	    while ((x != 0) && !((x >= 2) && (x <= 5)) && !(x == 'm' - '0') ) {
+	    while ((x != 0) && !((x >= 2) && (x <= 5)) && !(x == 'm' - '0')) {
 		x = key_get();
 		if (x == 27)
 		    break;
@@ -733,20 +681,19 @@ int changepars(void)
 	    }
 
 	    if (cwstart > 0)
-		mvprintw(13,29, "Autosend now: %1d        ",
-			cwstart);
+		mvprintw(13, 29, "Autosend now: %1d        ",
+			 cwstart);
 	    else {
-		if (cwstart < 0 )
-		    mvprintw(13,29, "Autosend now: Manual   ");
-	        else
-		    mvprintw(13,29, "Autosend now: OFF      ");
+		if (cwstart < 0)
+		    mvprintw(13, 29, "Autosend now: Manual   ");
+		else
+		    mvprintw(13, 29, "Autosend now: OFF      ");
 	    }
 	    refreshp();
 	    break;
 
 	}
-    default:
-	{
+	default: {
 	    nopar = 1;
 	}
     }
@@ -773,8 +720,8 @@ int changepars(void)
 
 /* -------------------------------------------------------------- */
 
-int networkinfo(void)
-{
+int networkinfo(void) {
+
     extern int use_bandoutput;
     extern int recv_packets;
     extern int recv_error;
@@ -849,8 +796,8 @@ int networkinfo(void)
 
 /* -------------------------------------------------------------- */
 
-int multiplierinfo(void)
-{
+int multiplierinfo(void) {
+
     extern int arrlss;
     extern int serial_section_mult;
     extern int sectn_mult;
@@ -912,7 +859,7 @@ int multiplierinfo(void)
     }
 
     if (serial_section_mult == 1 || (sectn_mult == 1 && arrlss != 1)) {
-	char * tmp;
+	char *tmp;
 	int worked_at;
 
 	mvprintw(0, 30, "REMAINING SECTIONS");
@@ -939,12 +886,12 @@ int multiplierinfo(void)
 		sprintf(mprint, "%-4s", tmp);
 		g_free(tmp);
 
-		strcat(mprint, (worked_at & BAND160)?"*":"-");
-		strcat(mprint, (worked_at & BAND80)?"*":"-");
-		strcat(mprint, (worked_at & BAND40)?"*":"-");
-		strcat(mprint, (worked_at & BAND20)?"*":"-");
-		strcat(mprint, (worked_at & BAND15)?"*":"-");
-		strcat(mprint, (worked_at & BAND10)?"*":"-");
+		strcat(mprint, (worked_at & BAND160) ? "*" : "-");
+		strcat(mprint, (worked_at & BAND80) ? "*" : "-");
+		strcat(mprint, (worked_at & BAND40) ? "*" : "-");
+		strcat(mprint, (worked_at & BAND20) ? "*" : "-");
+		strcat(mprint, (worked_at & BAND15) ? "*" : "-");
+		strcat(mprint, (worked_at & BAND10) ? "*" : "-");
 
 		mprint[11] = '\0';
 		mvprintw(vert, 2 + hor * 11, "%s", mprint);
@@ -976,8 +923,7 @@ int multiplierinfo(void)
 
 /* ------------------------- radio link debug ------------------------------ */
 
-int debug_tty(void)
-{
+int debug_tty(void) {
 
     extern char *rigportname;
     extern int serial_rate;
@@ -990,7 +936,7 @@ int debug_tty(void)
     char inputline[80] = "";
     const char eom[2] = { '\015', '\0' };
 
-/* initialize ttyS0*/
+    /* initialize ttyS0*/
 
     for (i = 0; i < 24; i++)
 	mvprintw(i, 0,
@@ -1040,36 +986,36 @@ int debug_tty(void)
 
     switch (serial_rate) {
 
-    case 1200:{
+	case 1200: {
 	    cfsetispeed(&termattribs, B1200);	/* Set input speed */
 	    cfsetospeed(&termattribs, B1200);	/* Set output speed */
 	    break;
 	}
 
-    case 2400:{
+	case 2400: {
 	    cfsetispeed(&termattribs, B2400);	/* Set input speed */
 	    cfsetospeed(&termattribs, B2400);	/* Set output speed */
 	    break;
 	}
 
-    case 4800:{
+	case 4800: {
 	    cfsetispeed(&termattribs, B4800);	/* Set input speed */
 	    cfsetospeed(&termattribs, B4800);	/* Set output speed */
 	    break;
 	}
 
-    case 9600:{
+	case 9600: {
 	    cfsetispeed(&termattribs, B9600);	/* Set input speed */
 	    cfsetospeed(&termattribs, B9600);	/* Set output speed */
 	    break;
 	}
-    case 57600:{
+	case 57600: {
 	    cfsetispeed(&termattribs, B57600);	/* Set input speed */
 	    cfsetospeed(&termattribs, B57600);	/* Set output speed */
 	    break;
 	}
 
-    default:{
+	default: {
 
 	    cfsetispeed(&termattribs, B9600);	/* Set input speed */
 	    cfsetospeed(&termattribs, B9600);	/* Set output speed */
@@ -1088,7 +1034,7 @@ int debug_tty(void)
     noecho();
     strcat(line, eom);
 
-/* send message */
+    /* send message */
     mvprintw(7, 0, "sending message to trx: %s", line);
     mvprintw(7, 40, "Length = %d characters", strlen(line));
     refreshp();
@@ -1116,7 +1062,7 @@ int debug_tty(void)
 	}
 	mvprintw(8, 40, "Length = %d characters", i);
 	if (inputline[0] == '@' && inputline[1] == 'A'
-	    && inputline[2] != 'F') {
+		&& inputline[2] != 'F') {
 	    mvprintw(20, 0, "Frequency = %d Hz",
 		     ((inputline[3] & 0xff) * 65536) +
 		     ((inputline[4] & 0xff) * 256) +
@@ -1131,7 +1077,7 @@ int debug_tty(void)
     refreshp();
     (void)key_get();
 
-/* close the tty */
+    /* close the tty */
 
     if (fdSertnc > 0)
 	close(fdSertnc);

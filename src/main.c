@@ -81,13 +81,13 @@ int use_rxvt = 0;
 int use_xterm = 0;
 
 int tlfcolors[8][2] = { {COLOR_BLACK, COLOR_WHITE},
-{COLOR_GREEN, COLOR_YELLOW},
-{COLOR_WHITE, COLOR_RED},
-{COLOR_CYAN, COLOR_WHITE},
-{COLOR_WHITE, COLOR_BLACK},
-{COLOR_WHITE, COLOR_MAGENTA},
-{COLOR_BLUE, COLOR_YELLOW},
-{COLOR_WHITE, COLOR_BLACK}
+    {COLOR_GREEN, COLOR_YELLOW},
+    {COLOR_WHITE, COLOR_RED},
+    {COLOR_CYAN, COLOR_WHITE},
+    {COLOR_WHITE, COLOR_BLACK},
+    {COLOR_WHITE, COLOR_MAGENTA},
+    {COLOR_BLUE, COLOR_YELLOW},
+    {COLOR_WHITE, COLOR_BLACK}
 };
 int debugflag = 0;
 int editor = EDITOR_JOE;
@@ -128,7 +128,7 @@ int cwpoints;
 int lowband_point_mult = 0;
 int sc_sidetone;
 char sc_volume[4] = "";
-  /* LZ3NY mods */
+/* LZ3NY mods */
 int my_country_points = -1;
 int my_cont_points = -1;
 int dx_cont_points = -1;
@@ -187,7 +187,9 @@ char multsfile[80] = "";	/* name of file with a list of allowed
 char exchange_list[40] = "";
 int timeoffset = 0;
 int trxmode = CWMODE;
-int rigmode = 0;		/* RIG_MODE_NONE in hamlib/rig.h, but if hamlib not compiled, then no dependecy */
+int rigmode = 0;		/* RIG_MODE_NONE in hamlib/rig.h,
+				   but if hamlib not compiled,
+				   then no dependency */
 int mixedmode = 0;
 char his_rst[4] = "599";
 char my_rst[4] = "599";
@@ -217,13 +219,13 @@ char synclogfile[120];
 char markerfile[120] = "";
 int xplanet = 0;
 unsigned char rigptt = 0;
-	/**< Bitmask for Hamlib CAT PTT
-	 * bit 0 set: CAT PTT wanted--RIGPTT in logcfg.dat (set in parse_logcfg)
-	 * bit 1 set: CAT PTT available--from rig caps (set in sendqrg)
-	 * bit 2 set: PTT active (set/unset in gettxinfo)
-	 * bit 3 set: PTT On (set/unset in callinput)
-	 * bit 4 set: PTT Off (set/unset in callinput)
-	 */
+/**< Bitmask for Hamlib CAT PTT
+ * bit 0 set: CAT PTT wanted--RIGPTT in logcfg.dat (set in parse_logcfg)
+ * bit 1 set: CAT PTT available--from rig caps (set in sendqrg)
+ * bit 2 set: PTT active (set/unset in gettxinfo)
+ * bit 3 set: PTT On (set/unset in callinput)
+ * bit 4 set: PTT Off (set/unset in callinput)
+ */
 
 char sp_return[80] = " \n";
 char cq_return[80] = " \n";
@@ -248,15 +250,17 @@ char message[25][80] = /**< Array of CW/DigiMode messages
 			* additional use if in CTCOMP mode
 			* message[1]  (F2)  - insert pressed
  			*/
-    { "TEST %\n", "@ DE %\n", "@ [\n", "TU 73\n", " @\n", "%\n",
-	"@ SRI QSO B4 GL\n", "AGN\n",
-	" ?\n", " QRZ?\n", " PSE K\n", "TEST % %\n", "@ [\n", "TU %\n",
-	"", "", "", "", "", "", "", "", "", "", "" };
+{
+    "TEST %\n", "@ DE %\n", "@ [\n", "TU 73\n", " @\n", "%\n",
+    "@ SRI QSO B4 GL\n", "AGN\n",
+    " ?\n", " QRZ?\n", " PSE K\n", "TEST % %\n", "@ [\n", "TU %\n",
+    "", "", "", "", "", "", "", "", "", "", ""
+};
 
 char ph_message[14][80] = /**< Array of file names for voice keyer messages
 			   * See description of message[]
 			   */
-	{ "", "", "", "", "", "", "", "", "", "", "", "", "", "" };
+    { "", "", "", "", "", "", "", "", "", "", "", "", "", "" };
 
 char qtc_recv_msgs[12][80] = {"QTC?\n", "QRV\n", "R\n", "", "TIME?\n", "CALL?\n", "NR?\n", "AGN\n", "", "QSL ALL\n", "", ""}; // QTC receive windowS Fx messages
 char qtc_send_msgs[12][80] = {"QRV?\n", "QTC sr/nr\n", "", "", "TIME\n", "CALL\n", "NR\n", "", "", "", "", ""}; // QTC send window Fx messages
@@ -304,11 +308,13 @@ int partials = 0;	/**< show partial calls */
 int use_part = 0;	/**< if 1 use automatically found partial call */
 int block_part = 0; 	/**< if 1 block the call autocompletion
 			  for these QSO */
-char para_word[80] = "LODNCFS:3C\n";	/* longcw, cluster, search,  DE, contest, filter,  speed,  delay */
+char para_word[80] = "LODNCFS:3C\n";	/* longcw, cluster, search, DE,
+					   contest, filter,  speed,  delay */
 char lastmsg[1000] = "";
-int scale_values[20] =
-    { 40, 38, 36, 34, 32, 30, 28, 26, 24, 22, 20, 18, 16, 14, 12, 10, 8, 6,
-4, 2 };
+int scale_values[20] = {
+    40, 38, 36, 34, 32, 30, 28, 26, 24, 22, 20, 18, 16, 14, 12, 10, 8, 6,
+    4, 2
+};
 char sc_device[40] = "/dev/dsp";
 
 /*-------------------------------------keyer------------------------------*/
@@ -378,7 +384,7 @@ char tonecpy[5];
 char simulator_tone[5];
 
 /*-------------------------------the log lines-----------------------------*/
-char qsos[MAX_QSOS][LOGLINELEN+1];
+char qsos[MAX_QSOS][LOGLINELEN + 1];
 int nr_qsos = 0;
 
 /*------------------------------dupe array---------------------------------*/
@@ -400,8 +406,7 @@ int multlist = 0;
 int callareas[20];
 int multscore[NBANDS];
 
-struct ie_list *main_ie_list = NULL;
-				/* head of initial exchange list */
+struct ie_list *main_ie_list = NULL;	/* head of initial exchange list */
 
 int zonescore[NBANDS];
 int countryscore[NBANDS];
@@ -424,16 +429,17 @@ int logfrequency = 0;
 int rit;
 int trx_control = 0;
 int showfreq = 0;
-float bandfrequency[NBANDS] =
-    { 1830.0, 3525.0, 7010.0, 10105.0, 14025.0, 18070.0, 21025.0, 24900.0,
-28025.0, 0. };
+float bandfrequency[NBANDS] = {
+    1830.0, 3525.0, 7010.0, 10105.0, 14025.0, 18070.0, 21025.0, 24900.0,
+    28025.0, 0.
+};
 
 char headerline[81] =
     "   1=CQ  2=DE  3=RST 4=73  5=HIS  6=MY  7=B4   8=AGN  9=?  \n";
 char backgrnd_str[81] =
     "                                                                                ";
 
-char logline_edit[5][LOGLINELEN+1];
+char logline_edit[5][LOGLINELEN + 1];
 
 char terminal1[88] = "";
 char terminal2[88] = "";
@@ -471,57 +477,55 @@ static struct termios oldt, newt;
 
 /** parse program options
  */
-void parse_options(int argc, char *argv[])
-{
+void parse_options(int argc, char *argv[]) {
     while ((argc > 1) && (argv[1][0] == '-')) {
 	switch (argv[1][1]) {
 	    /* verbose option */
-	case 'f':
-	    if (strlen(argv[1] + 2) > 0) {
-		if ((*(argv[1] + 2) == '~') && (*(argv[1] + 3) == '/')) {
-		    /* tilde expansion */
-		    config_file = g_strconcat( g_get_home_dir(),
-			    argv[1] + 3, NULL);
+	    case 'f':
+		if (strlen(argv[1] + 2) > 0) {
+		    if ((*(argv[1] + 2) == '~') && (*(argv[1] + 3) == '/')) {
+			/* tilde expansion */
+			config_file = g_strconcat(g_get_home_dir(),
+						  argv[1] + 3, NULL);
+		    } else {
+			config_file = g_strdup(argv[1] + 2);
+		    }
 		}
-	    	else {
-		    config_file = g_strdup(argv[1] + 2);
-		}
-	    }
-	    break;
-	case 's':
-	    if (strlen(argv[1] + 2) > 0)
-		strcpy(synclogfile, argv[1] + 2);
-	    break;
-	case 'd':		// debug rigctl
-	    debugflag = 1;
-	    break;
-	case 'v':		// verbose startup
-	    verbose = 1;
-	    break;
-	case 'V':		// output version
-	    printf("Version: tlf-%s\n", VERSION);
-	    exit(0);
-	    break;
-	case 'n':		// disable packet
-	    nopacket = 1;
-	    break;
-	case 'r':
-	    no_trx_control = 1; // disable radio control
-	    break;
-        case 'i':
-            convert_cabrillo = 1;
-            break;
-	default:
-	    printf("Use: tlf [-v] Verbose\n");
-	    printf("         [-V] Version\n");
-	    printf("         [-f] Configuration file\n");
-	    printf("         [-d] Debug mode\n");
-	    printf("         [-h] This message\n");
-	    printf("         [-n] Start without cluster hookup\n");
-	    printf("         [-r] Start without radio control\n");
-	    printf("         [-i] Import cabrillo file to Tlf format\n");
-	    exit(0);
-	    break;
+		break;
+	    case 's':
+		if (strlen(argv[1] + 2) > 0)
+		    strcpy(synclogfile, argv[1] + 2);
+		break;
+	    case 'd':		// debug rigctl
+		debugflag = 1;
+		break;
+	    case 'v':		// verbose startup
+		verbose = 1;
+		break;
+	    case 'V':		// output version
+		printf("Version: tlf-%s\n", VERSION);
+		exit(0);
+		break;
+	    case 'n':		// disable packet
+		nopacket = 1;
+		break;
+	    case 'r':
+		no_trx_control = 1; // disable radio control
+		break;
+	    case 'i':
+		convert_cabrillo = 1;
+		break;
+	    default:
+		printf("Use: tlf [-v] Verbose\n");
+		printf("         [-V] Version\n");
+		printf("         [-f] Configuration file\n");
+		printf("         [-d] Debug mode\n");
+		printf("         [-h] This message\n");
+		printf("         [-n] Start without cluster hookup\n");
+		printf("         [-r] Start without radio control\n");
+		printf("         [-i] Import cabrillo file to Tlf format\n");
+		exit(0);
+		break;
 	}
 	--argc;
 	++argv;
@@ -530,16 +534,16 @@ void parse_options(int argc, char *argv[])
 
 
 /** initialize user interface */
-void ui_init()
-{
+void ui_init() {
+
     /* modify stdin terminals attributes to allow Ctrl-Q/S key recognition */
-    tcgetattr( STDIN_FILENO, &oldt);
+    tcgetattr(STDIN_FILENO, &oldt);
     newt = oldt;
     newt.c_iflag &= ~(IXON);
-    tcsetattr( STDIN_FILENO, TCSANOW, &newt);
+    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
 
-/* getting users terminal string and (if RXVT) setting rxvt colours on it */
-/* LZ3NY hack :) */
+    /* getting users terminal string and (if RXVT) setting rxvt colours on it */
+    /* LZ3NY hack :) */
     char *term = getenv("TERM");
     if (strcasecmp(term, "rxvt") == 0) {
 	use_rxvt = 1;
@@ -567,7 +571,7 @@ void ui_init()
     if ((mainscreen = newterm(NULL, stdout, stdin)) == NULL) {
 	perror("initscr");
 	printf
-	    ("\nSorry, wrong terminal type !!!!! \nTry a  linux text terminal or set TERM=linux !!!\n");
+	("\nSorry, wrong terminal type !!!!! \nTry a  linux text terminal or set TERM=linux !!!\n");
 	sleep(2);
 
 	exit(EXIT_FAILURE);
@@ -580,11 +584,11 @@ void ui_init()
     if ((ymax < 25) || (xmax < 80)) {
 	char c;
 
-	showmsg( "!! TLF needs at least 25 lines and 80 columns !!");
-	showmsg( "   Continue anyway? Y/(N)" );
-	c = toupper( key_get() );
+	showmsg("!! TLF needs at least 25 lines and 80 columns !!");
+	showmsg("   Continue anyway? Y/(N)");
+	c = toupper(key_get());
 	if (c != 'Y') {
-	    showmsg( "73 es cuagn" );
+	    showmsg("73 es cuagn");
 	    sleep(1);
 	    endwin();
 	    exit(EXIT_FAILURE);
@@ -606,15 +610,15 @@ void ui_init()
     noecho();
     cbreak();
 
-    keypad(stdscr,TRUE);
+    keypad(stdscr, TRUE);
 
     lookup_keys();
 }
 
 
 /* setup colors */
-void ui_color_init()
-{
+void ui_color_init() {
+
     if (use_rxvt == 1) {	// use rxvt colours
 	init_pair(COLOR_BLACK, COLOR_BLACK, COLOR_RED);
 	if (use_xterm == 1) {
@@ -649,8 +653,7 @@ void ui_color_init()
 /** load all databases
  *
  * \return EXIT_FAILURE if not successful */
-int databases_load()
-{
+int databases_load() {
     int status;
 
     showmsg("reading country data");
@@ -661,8 +664,8 @@ int databases_load()
     status |= read_rules();	/* read the additional contest rules
 				   in "rules/contestname" */
     if (status != PARSE_OK) {
-	showmsg( "Problems in logcfg.dat or rule file detected! Continue Y/(N)?");
-	if (toupper( key_get() ) != 'Y') {
+	showmsg("Problems in logcfg.dat or rule file detected! Continue Y/(N)?");
+	if (toupper(key_get()) != 'Y') {
 	    showmsg("73...");
 	    return EXIT_FAILURE;
 	}
@@ -670,7 +673,7 @@ int databases_load()
 
     if (*call == '\0') {
 	showmsg
-	    ("WARNING: No callsign defined in logcfg.dat! exiting...\n\n\n");
+	("WARNING: No callsign defined in logcfg.dat! exiting...\n\n\n");
 	return EXIT_FAILURE;
     }
 
@@ -694,8 +697,8 @@ int databases_load()
 	main_ie_list = make_ie_list(exchange_list);
 
 	if (main_ie_list == NULL) {
-	    showmsg( "Problems in initial exchange file detected! Continue Y/(N)?");
-	    if (toupper( key_get() ) != 'Y') {
+	    showmsg("Problems in initial exchange file detected! Continue Y/(N)?");
+	    if (toupper(key_get()) != 'Y') {
 		showmsg("73...");
 		return EXIT_FAILURE;
 	    }
@@ -704,13 +707,13 @@ int databases_load()
 
     /* make sure logfile is there and has the right format */
     if (checklogfile_new(logfile) != 0) {
-	showmsg( "Can not access logfile. Giving up" );
+	showmsg("Can not access logfile. Giving up");
 	return EXIT_FAILURE;
     }
 
     if (qtcdirection > 0) {
 	if (checkqtclogfile() != 0) {
-	    showmsg( "QTC's giving up" );
+	    showmsg("QTC's giving up");
 	    return EXIT_FAILURE;
 	}
 	readqtccalls();
@@ -722,8 +725,8 @@ int databases_load()
     return 0;
 }
 
-void hamlib_init()
-{
+void hamlib_init() {
+
 #ifdef HAVE_LIBHAMLIB		// Code for hamlib interface
     int status;
 
@@ -743,13 +746,13 @@ void hamlib_init()
 	status = init_tlf_rig();
 
 	if (status  != 0) {
-	    showmsg( "Continue without rig control Y/(N)?");
-	    if (toupper( key_get() ) != 'Y') {
+	    showmsg("Continue without rig control Y/(N)?");
+	    if (toupper(key_get()) != 'Y') {
 		endwin();
 		exit(1);
 	    }
 	    trx_control = 0;
-	    showmsg( "Disabling rig control!");
+	    showmsg("Disabling rig control!");
 	    sleep(1);
 	}
     }
@@ -757,7 +760,7 @@ void hamlib_init()
     showmsg("No Hamlib compiled in!");
 
     trx_control = 0;
-    showmsg( "Disabling rig control!");
+    showmsg("Disabling rig control!");
     sleep(1);
 #endif				/* HAVE_LIBHAMLIB */
 }
@@ -776,8 +779,7 @@ void fldigi_init() {
 #endif
 }
 
-void lan_init()
-{
+void lan_init() {
     if (lan_active == 1) {
 	if (lanrecv_init() < 0)	/* set up the network */
 	    showmsg("LAN receive  init failed");
@@ -792,8 +794,7 @@ void lan_init()
 }
 
 
-void packet_init()
-{
+void packet_init() {
     if (nopacket == 1)
 	packetinterface = 0;
 
@@ -811,8 +812,7 @@ void packet_init()
 }
 
 
-void keyer_init()
-{
+void keyer_init() {
     char keyerbuff[3];
 
     if (cwkeyer == NET_KEYER) {
@@ -864,8 +864,7 @@ void keyer_init()
  * Cleanup initialisations made by tlf. Will be called after exit() from
  * logit() or background_process()
  */
-void tlf_cleanup()
-{
+void tlf_cleanup() {
     if (pthread_self() != background_thread) {
 	pthread_cancel(background_thread);
 	pthread_join(background_thread, NULL);
@@ -893,7 +892,7 @@ void tlf_cleanup()
 #endif
 
     endwin();
-    tcsetattr( STDIN_FILENO, TCSANOW, &oldt);
+    tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
 }
 
 
@@ -901,8 +900,7 @@ void tlf_cleanup()
 /*     Main loop of the program			                           */
 /* ------------------------------------------------------------------------*/
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     int j;
     int ret;
     char tlfversion[80] = "";
@@ -931,7 +929,7 @@ int main(int argc, char *argv[])
 
 
     sprintf(tlfversion,
-	    "        Welcome to tlf-%s by PA0R!!" , VERSION);
+	    "        Welcome to tlf-%s by PA0R!!", VERSION);
     showmsg(tlfversion);
     showmsg("");
 
@@ -943,18 +941,19 @@ int main(int argc, char *argv[])
     }
 
     if (convert_cabrillo == 1) {
-        char tstring[100] = "";
-        sprintf(tstring, "Converting cabrillo for contest %s from file %s.cbr", whichcontest, g_strstrip(call));
-        showmsg(tstring);
-        showmsg("");
-        getstationinfo();
-        if(0!=readcabrillo(READCAB_MODE_CLI))
+	char tstring[100] = "";
+	sprintf(tstring, "Converting cabrillo for contest %s from file %s.cbr",
+		whichcontest, g_strstrip(call));
+	showmsg(tstring);
+	showmsg("");
+	getstationinfo();
+	if (0 != readcabrillo(READCAB_MODE_CLI))
 	    showmsg("Sorry. Conversion failed....");
 	else
 	    showmsg("Done...");
 	sleep(2);
 	endwin();
-        exit(EXIT_SUCCESS);
+	exit(EXIT_SUCCESS);
     }
 
     /* now setup colors */
@@ -969,7 +968,7 @@ int main(int argc, char *argv[])
     keyer_init();
 
     clear();
-    mvprintw(0, 0, "        Welcome to tlf-%s by PA0R!!\n\n" , VERSION);
+    mvprintw(0, 0, "        Welcome to tlf-%s by PA0R!!\n\n", VERSION);
     refreshp();
 
     checkparameters();		/* check .paras file */
@@ -1002,7 +1001,7 @@ int main(int argc, char *argv[])
     }
 
     /* now start logging  !! Does never return */
-    logit(NULL);
+    logit();
 
     return 0;
 }

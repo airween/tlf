@@ -19,10 +19,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-	/* ------------------------------------------------------------
-	 *        Callinput handles the call input field
-	 *
-	 *--------------------------------------------------------------*/
+/* ------------------------------------------------------------
+ *        Callinput handles the call input field
+ *
+ *--------------------------------------------------------------*/
 
 
 #include <ctype.h>
@@ -104,8 +104,8 @@ extern float bandfrequency[];
 /** callsign input loop
  *
  * \return code of last typed character */
-char callinput(void)
-{
+int callinput(void) {
+
     extern int itumult;
     extern int wazmult;
     extern int isdupe;		// LZ3NY auto-b4 patch
@@ -169,7 +169,7 @@ char callinput(void)
 
 
     int cury, curx;
-    int i, j, ii, rc, t, x = 0;
+    int j, ii, rc, t, x = 0;
     char instring[2] = { '\0', '\0' };
     static int lastwindow;
 
@@ -179,7 +179,7 @@ char callinput(void)
     printcall();	/* print call input field */
     searchlog(hiscall);
 
-    for (i = strlen(hiscall); i <= 13; i++) {
+    while (strlen(hiscall) <= 13) {
 
 	show_zones(bandinx);
 	printcall();
@@ -211,7 +211,7 @@ char callinput(void)
 	     * from frequency and if so add call to spot list */
 	    if (bmautoadd != 0 && freqstore != 0) {
 		if (strlen(hiscall) >= 3) {
-		    if (fabsf(freq-freqstore) > 0.1) {
+		    if (fabsf(freq - freqstore) > 0.1) {
 			add_to_spots(hiscall, freqstore);
 			hiscall[0] = '\0';
 			HideSearchPanel();
@@ -239,7 +239,7 @@ char callinput(void)
 
 	    /* wait till freq of grabbed spot is reported back from rig.
 	     * Then go to 'reached' state' */
-	    if (grab.state == IN_PROGRESS && fabs(freq-grab.spotfreq) <= 0.1)
+	    if (grab.state == IN_PROGRESS && fabs(freq - grab.spotfreq) <= 0.1)
 		grab.state = REACHED;
 
 	    /* Check if we tune away from old freq before a grabbed spot is
@@ -247,7 +247,7 @@ char callinput(void)
 
 	    /* if we have grabbed a call from spot list and tune away
 	     * then forget about it */
-	    if (fabsf(freq-grab.spotfreq) > 0.1 && grab.state == REACHED) {
+	    if (fabsf(freq - grab.spotfreq) > 0.1 && grab.state == REACHED) {
 		grab.state = NONE;
 		hiscall[0] = '\0';
 		printcall();
@@ -263,9 +263,8 @@ char callinput(void)
 
 	}
 
-
 	/* special handling of some keycodes if call field is empty */
-	if (i == 0 || *hiscall == '\0') {
+	if (*hiscall == '\0') {
 	    if ((x == '+') && (*hiscall == '\0') && (ctcomp == 0)) {
 		/* switch to other mode */
 		if (cqmode == CQ) {
@@ -315,9 +314,8 @@ char callinput(void)
 
 	switch (x) {
 
-	// Plus, in CT mode send exchange, log QSO, no message sent.
-	case '+':
-	    {
+	    // Plus, in CT mode send exchange, log QSO, no message sent.
+	    case '+': {
 		if ((ctcomp != 0) && (strlen(hiscall) > 2)) {
 		    if (trxmode == CWMODE || trxmode == DIGIMODE) {
 			sendmessage(message[2]);	/* F3 */
@@ -326,7 +324,7 @@ char callinput(void)
 			play_file(ph_message[2]);
 
 		    if (((cqww == 1) || (wazmult == 1))
-			&& (*comment == '\0'))
+			    && (*comment == '\0'))
 			strcpy(comment, cqzone);
 
 		    if ((itumult == 1) && (*comment == '\0'))
@@ -337,9 +335,8 @@ char callinput(void)
 		break;
 	    }
 
-	// Ctrl-Q (^Q), open QTC window for receiving or sending QTCs.
-	case 17:
-	    {
+	    // Ctrl-Q (^Q), open QTC window for receiving or sending QTCs.
+	    case 17: {
 		if (qtcdirection == 1 || qtcdirection == 3) {	// in case of QTC=RECV or QTC=BOTH
 		    qtc_main_panel(RECV);
 		}
@@ -350,9 +347,8 @@ char callinput(void)
 		continue;
 	    }
 
-	// Ctrl-S (^S), open QTC window for sending QTCs.
-	case 19:
-	    {
+	    // Ctrl-S (^S), open QTC window for sending QTCs.
+	    case 19: {
 		if (qtcdirection == 2 || qtcdirection == 3) {	// in case of QTC=SEND ot QTC=BOTH
 		    qtc_main_panel(SEND);
 		}
@@ -360,38 +356,34 @@ char callinput(void)
 		continue;
 	    }
 
-	// <Home>, enter call edit when call field is not empty.
-	case KEY_HOME:
-	    {
+	    // <Home>, enter call edit when call field is not empty.
+	    case KEY_HOME: {
 		if ((*hiscall != '\0') && (ungetch(x) == OK)) {
-			calledit();
+		    calledit();
 		}
 
 		break;
 	    }
 
-	// Left Arrow, enter call edit when call field is not empty, or band down.
-	case KEY_LEFT:
-	    {
+	    // Left Arrow, enter call edit when call field is not empty, or band down.
+	    case KEY_LEFT: {
 		if (*hiscall != '\0') {
 		    calledit();
 		} else {
-                    handle_bandswitch(BAND_DOWN);
+		    handle_bandswitch(BAND_DOWN);
 		}
 
 		break;
 	    }
 
-	// Right Arrow, band up when call field is empty.
-	case KEY_RIGHT:
-	    {
-                handle_bandswitch(BAND_UP);
+	    // Right Arrow, band up when call field is empty.
+	    case KEY_RIGHT: {
+		handle_bandswitch(BAND_UP);
 		break;
 	    }
 
-	// Alt-w (M-w), set Morse weight.
-	case 247:
-	    {
+	    // Alt-w (M-w), set Morse weight.
+	    case 247: {
 		char weightbuf[5] = "";
 		char *end;
 
@@ -428,12 +420,10 @@ char callinput(void)
 		break;
 	    }
 
-	// Alt-v (M-v), change Morse speed in CW mode, else band down.
-	case 246:
-	    {
+	    // Alt-v (M-v), change Morse speed in CW mode, else band down.
+	    case 246: {
 		if (ctcomp == 1) {
-		    while (x != 27)	//escape
-		    {
+		    while (x != 27) {	//escape
 			nicebox(1, 1, 2, 12, "Cw");
 			attron(COLOR_PAIR(C_LOG) | A_STANDOUT);
 			mvprintw(2, 2, "Speed:   %2d ", GetCWSpeed());
@@ -459,16 +449,15 @@ char callinput(void)
 			clear_display();
 		    }
 		} else {	// trlog compatible, band switch
-                    handle_bandswitch(BAND_DOWN);
+		    handle_bandswitch(BAND_DOWN);
 		}
 		x = -1;
 
 		break;
 	    }
 
-	// <Page-Up>, change RST if call field not empty, else increase CW speed.
-	case KEY_PPAGE:
-	    {
+	    // <Page-Up>, change RST if call field not empty, else increase CW speed.
+	    case KEY_PPAGE: {
 		if ((change_rst == 1) && (strlen(hiscall) != 0)) {	// change RST
 
 		    if (his_rst[1] <= 56) {
@@ -490,9 +479,8 @@ char callinput(void)
 	    }
 
 
-	// <Page-Down>, change RST if call field not empty, else decrease CW speed.
-	case KEY_NPAGE:
-	    {
+	    // <Page-Down>, change RST if call field not empty, else decrease CW speed.
+	    case KEY_NPAGE: {
 		if ((change_rst == 1) && (strlen(hiscall) != 0)) {
 
 		    if (his_rst[1] > 49) {
@@ -512,10 +500,9 @@ char callinput(void)
 		break;
 	    }
 
-	// <Enter>, log QSO in CT mode, else test if B4 message should be sent.
-	case '\n':
-	case KEY_ENTER:
-	    {
+	    // <Enter>, log QSO in CT mode, else test if B4 message should be sent.
+	    case '\n':
+	    case KEY_ENTER: {
 		if (strlen(hiscall) > 2 && ctcomp == 1) {
 		    /* there seems to be a call
 		     * means: log it (in CT mode */
@@ -541,9 +528,8 @@ char callinput(void)
 		break;
 	    }
 
-	// <Insert>, send exchange in CT mode
-	case KEY_IC:
-	    {
+	    // <Insert>, send exchange in CT mode
+	    case KEY_IC: {
 		if (ctcomp != 0) {
 		    if (trxmode == CWMODE || trxmode == DIGIMODE) {
 			sendmessage(message[1]);	// F2
@@ -555,9 +541,8 @@ char callinput(void)
 		break;
 	    }
 
-	// Colon, prefix for entering commands or changing parameters.
-	case ':':
-	    {
+	    // Colon, prefix for entering commands or changing parameters.
+	    case ':': {
 		changepars();
 		hiscall[0] = '\0';
 		x = 0;
@@ -576,9 +561,8 @@ char callinput(void)
 		break;
 	    }
 
-	// Hash, save xcvr freq to mem or restore mem to xcvr.
-	case '#':
-	    {
+	    // Hash, save xcvr freq to mem or restore mem to xcvr.
+	    case '#': {
 		if (mem == 0.0) {
 		    mem = freq;
 		    mvprintw(14, 68, "MEM: %7.1f", mem);
@@ -596,39 +580,34 @@ char callinput(void)
 		break;
 	    }
 
-	// Minus, delete previous QSO from log.
-	case '-':
-	    {
+	    // Minus, delete previous QSO from log.
+	    case '-': {
 		delete_qso();
 		break;
 	    }
 
-	// Semicolon or Alt-n (M-n), insert note in log.
-	case ';':
-	case 238:
-	    {
+	    // Semicolon or Alt-n (M-n), insert note in log.
+	    case ';':
+	    case 238: {
 		include_note();
 		x = -1;
 		break;
 	    }
 
-	// Alt-0 to Alt-9 (M-0...M-9), send CW/Digimode messages 15-24.
-	case 176 ... 185:
-	    {
+	    // Alt-0 to Alt-9 (M-0...M-9), send CW/Digimode messages 15-24.
+	    case 176 ... 185: {
 		sendmessage(message[x - 162]);	/* alt-0 to alt-9 */
 
 		break;
 	    }
 
-	// F1, send CQ or S&P call message.
-	case KEY_F(1):
-	    {
+	    // F1, send CQ or S&P call message.
+	    case KEY_F(1): {
 		if (trxmode == CWMODE || trxmode == DIGIMODE) {
 
 		    if (cqmode == 0) {
 			sendspcall();
-		    }
-		    else {
+		    } else {
 			sendmessage(message[0]);	/* CQ */
 		    }
 
@@ -646,9 +625,8 @@ char callinput(void)
 		break;
 	    }
 
-	// F2-F11, send messages 2 through 11.
-	case KEY_F(2) ... KEY_F(11):
-	    {
+	    // F2-F11, send messages 2 through 11.
+	    case KEY_F(2) ... KEY_F(11): {
 		if (trxmode == CWMODE || trxmode == DIGIMODE) {
 		    sendmessage(message[x - KEY_F(1)]);	// F2...F11 - F1 = 1...10
 
@@ -658,24 +636,20 @@ char callinput(void)
 		break;
 	    }
 
-	// F12, activate autocq timing and message.
-	case KEY_F(12):
-	    {
+	    // F12, activate autocq timing and message.
+	    case KEY_F(12): {
 		x = auto_cq();
 		break;
 	    }
 
-	// Query, send call with " ?" appended or F5 message in voice mode.
-	case '?':
-	    {
+	    // Query, send call with " ?" appended or F5 message in voice mode.
+	    case '?': {
 		if (*hiscall != '\0') {
 		    if (trxmode == CWMODE || trxmode == DIGIMODE) {
 			strcat(hiscall, " ?");
 			sendmessage(message[4]);
 			hiscall[strlen(hiscall) - 2] = '\0';
-		    }
-		    else
-		    {
+		    } else {
 			play_file(ph_message[4]);
 		    }
 		}
@@ -683,32 +657,29 @@ char callinput(void)
 		break;
 	    }
 
-	// <Backspace>, remove chracter left of cursor, move cursor left one position.
-	case KEY_BACKSPACE:
-	    {
+	    // <Backspace>, remove chracter left of cursor, move cursor left one position.
+	    case KEY_BACKSPACE: {
 		if (*hiscall != '\0') {
 		    getyx(stdscr, cury, curx);
-                    mvprintw(cury, curx - 1, " ");
-                    mvprintw(cury, curx - 1, "");
+		    mvprintw(cury, curx - 1, " ");
+		    mvprintw(cury, curx - 1, "");
 		    hiscall[strlen(hiscall) - 1] = '\0';
 
 		    if (atoi(hiscall) < 1800) {	/*  no frequency */
-			showinfo( getctydata(hiscall) );
+			showinfo(getctydata(hiscall));
 			searchlog(hiscall);
 			refreshp();
 		    }
 
-		    i--;
 		    x = -1;
 		    break;
 		}
 		break;
 	    }
 
-	// Alt-r (M-r) or Alt-s (M-s), toggle score window.
-	case 242:
-	case 243:
-	    {
+	    // Alt-r (M-r) or Alt-s (M-s), toggle score window.
+	    case 242:
+	    case 243: {
 		if (showscore_flag == 0)
 		    showscore_flag = 1;
 		else {
@@ -718,16 +689,14 @@ char callinput(void)
 		break;
 	    }
 
-	// Alt-k (M-k), synonym for Ctrl-K (^K).
-	case 235:
-	    {
+	    // Alt-k (M-k), synonym for Ctrl-K (^K).
+	    case 235: {
 		x = 11;		// Ctrl-K
 		break;
 	    }
 
-	// Alt-a (M-a), cycle cluster window.
-	case 225:
-	    {
+	    // Alt-a (M-a), cycle cluster window.
+	    case 225: {
 		if (cluster == NOCLUSTER) {
 		    cluster = CLUSTER;	// alt-A
 		    announcefilter = FILTER_ALL;
@@ -752,18 +721,16 @@ char callinput(void)
 		break;
 	    }
 
-	// Alt-b (M-b), band-up for TR-Log mode.
-	case 226:
-	    {
+	    // Alt-b (M-b), band-up for TR-Log mode.
+	    case 226: {
 		if (ctcomp == 0) {
-                    handle_bandswitch(BAND_UP);
+		    handle_bandswitch(BAND_UP);
 		}
 		break;
 	    }
 
-	// Alt-j (M-j), show station frequencies.
-	case 234:
-	    {
+	    // Alt-j (M-j), show station frequencies.
+	    case 234: {
 		if (cluster != FREQWINDOW) {
 		    lastwindow = cluster;
 		    cluster = FREQWINDOW;
@@ -773,24 +740,21 @@ char callinput(void)
 		break;
 	    }
 
-	// Alt-h (M-h), show help.
-	case 232:
-	    {
+	    // Alt-h (M-h), show help.
+	    case 232: {
 		show_help();
 		break;
 	    }
 
-	// Alt-, (M-,) or period, change bandmap filter config.
-	case 172:
-	case '.':
-	    {
+	    // Alt-, (M-,) or period, change bandmap filter config.
+	    case 172:
+	    case '.': {
 		bm_menu();
 		break;
 	    }
 
-	// Alt-c (M-c), toggle check window.
-	case 227:
-	    {
+	    // Alt-c (M-c), toggle check window.
+	    case 227: {
 		if (searchflg != SEARCHWINDOW)
 		    searchflg = SEARCHWINDOW;
 		else
@@ -798,17 +762,15 @@ char callinput(void)
 		break;
 	    }
 
-	// Alt-m (M-m), show multipliers.
-	case 237:
-	    {
+	    // Alt-m (M-m), show multipliers.
+	    case 237: {
 		show_mults();
 		refreshp();
 		break;
 	    }
 
-	// Alt-p (M-p), toggle PTT via cwdaemon
-	case 240:
-	    {
+	    // Alt-p (M-p), toggle PTT via cwdaemon
+	    case 240: {
 		if (k_ptt == 0) {
 		    k_ptt = 1;
 		    attron(COLOR_PAIR(C_HEADER) | A_STANDOUT);
@@ -828,9 +790,8 @@ char callinput(void)
 		break;
 	    }
 
-	// Alt-t (M-t), tune xcvr via cwdaemon.
-	case 244:
-	    {
+	    // Alt-t (M-t), tune xcvr via cwdaemon.
+	    case 244: {
 		int count;
 		gchar *buff;
 
@@ -843,16 +804,16 @@ char callinput(void)
 		netkeyer(K_TUNE, buff);	// cw on
 		g_free(buff);
 
-		count = (int) (TUNE_UP / 0.25);
+		count = (int)(TUNE_UP / 0.25);
 
 		while (count != 0) {
-		    usleep( 250000 );
+		    usleep(250000);
 		    if ((key_poll()) != -1)	// any key pressed ?
 			break;
 		    count--;
 		}
 
-		netkeyer( K_ABORT, "");	// cw abort
+		netkeyer(K_ABORT, "");	// cw abort
 
 		mvprintw(0, 2, "%s", mode);
 		refreshp();
@@ -860,9 +821,8 @@ char callinput(void)
 		break;
 	    }
 
-	// Alt-z (M-z), show zones worked.
-	case 250:
-	    {
+	    // Alt-z (M-z), show zones worked.
+	    case 250: {
 		if (cqww == 1) {
 		    if (zonedisplay == 0)
 			zonedisplay = 1;
@@ -877,10 +837,9 @@ char callinput(void)
 		break;
 	    }
 
-	// Alt-q (M-q) or Alt-x (M-x), Exit
-	case 241:
-	case 248:
-	    {
+	    // Alt-q (M-q) or Alt-x (M-x), Exit
+	    case 241:
+	    case 248: {
 		mvprintw(13, 29, "You want to leave tlf? (y/n): ");
 		while (x != 'n' && x != 'N') {
 
@@ -899,15 +858,13 @@ char callinput(void)
 		break;
 	    }
 
-	// <Escape>, clear call input or stop sending.
-	case 27:
-	    {
+	    // <Escape>, clear call input or stop sending.
+	    case 27: {
 		if (early_started == 0) {
 		    /* if CW not started early drop call and start anew */
 		    cleanup();
 		    clear_display();
-		}
-		else {
+		} else {
 		    /* otherwise just stop sending */
 		    stoptx();
 		    *hiscall_sent = '\0';
@@ -919,34 +876,31 @@ char callinput(void)
 		break;
 	    }
 
-	// Underscore, confirm last exchange.
-	case '_':
-	    {
+	    // Underscore, confirm last exchange.
+	    case '_': {
 		prev_qso();
 
 		break;
 	    }
 
-	// Exclamation, open a new shell.
-	case '!':
-	    {
-                const char *shell = getenv("SHELL");
-                if (shell == NULL) {
-                    shell = "sh";
-                }
+	    // Exclamation, open a new shell.
+	    case '!': {
+		const char *shell = getenv("SHELL");
+		if (shell == NULL) {
+		    shell = "sh";
+		}
 		endwin();
-		rc=system("clear");
-		rc=system(shell);
-		rc=system("clear");
+		rc = system("clear");
+		rc = system(shell);
+		rc = system("clear");
 		set_term(mainscreen);
 		clear_display();
 
 		break;
 	    }
 
-	// Ctrl-L (^L), resets screen.
-	case 12:
-	    {
+	    // Ctrl-L (^L), resets screen.
+	    case 12: {
 		endwin();
 		set_term(mainscreen);
 		clear_display();
@@ -954,9 +908,8 @@ char callinput(void)
 		break;
 	    }
 
-	// Ctrl-P (^P), show MUF display.
-	case 16:
-	    {
+	    // Ctrl-P (^P), show MUF display.
+	    case 16: {
 		int currentterm = miniterm;
 		miniterm = 0;
 		muf();
@@ -966,9 +919,8 @@ char callinput(void)
 		break;
 	    }
 
-	// Ctrl-A (^A), add a spot and share on LAN.
-	case 1:
-	    {
+	    // Ctrl-A (^A), add a spot and share on LAN.
+	    case 1: {
 		addspot();
 		HideSearchPanel();
 		showinfo(0);
@@ -980,9 +932,8 @@ char callinput(void)
 		break;
 	    }
 
-	// Ctrl-B (^B), send spot to DX cluster.
-	case 2:
-	    {
+	    // Ctrl-B (^B), send spot to DX cluster.
+	    case 2: {
 		announcefilter = 0;
 		cluster = CLUSTER;
 		send_cluster();
@@ -990,58 +941,51 @@ char callinput(void)
 		break;
 	    }
 
-	// Ctrl-F (^F), change frequency dialog.
-	case 6:
-	    {
+	    // Ctrl-F (^F), change frequency dialog.
+	    case 6: {
 		change_freq();
 
 		break;
 	    }
 
-	// Ctrl-G (^G), grab next DX spot from bandmap.
-	case 7:
-	    {
+	    // Ctrl-G (^G), grab next DX spot from bandmap.
+	    case 7: {
 		double f = grab_next();
-                if (f > 0.0) {
-                    grab.state = IN_PROGRESS;
-                    grab.spotfreq = f/1000.;
-                    attron(COLOR_PAIR(C_HEADER) | A_STANDOUT);
-                    mvprintw(0, 2, "%s", mode);
-                    freqstore = 0;
-                    hiscall_filled = 0;
-                }
-
+		if (f > 0.0) {
+		    grab.state = IN_PROGRESS;
+		    grab.spotfreq = f/1000.;
+		    attron(COLOR_PAIR(C_HEADER) | A_STANDOUT);
+		    mvprintw(0, 2, "%s", mode);
+		    freqstore = 0;
+		    hiscall_filled = 0;
+		}
 		break;
 	    }
 
-	// Alt-g (M-g), grab first spot matching call field chars.
-	case 231:
-	    {
+	    // Alt-g (M-g), grab first spot matching call field chars.
+	    case 231: {
 		double f = grabspot();
-                if (f > 0.0) {
-                    grab.state = IN_PROGRESS;
-                    grab.spotfreq = f/1000.;
-                    attron(COLOR_PAIR(C_HEADER) | A_STANDOUT);
-                    mvprintw(0, 2, "%s", mode);
-                    freqstore = 0;
-                    hiscall_filled = 0;
-                }
-
+		if (f > 0.0) {
+		    grab.state = IN_PROGRESS;
+		    grab.spotfreq = f/1000.;
+		    attron(COLOR_PAIR(C_HEADER) | A_STANDOUT);
+		    mvprintw(0, 2, "%s", mode);
+		    freqstore = 0;
+		    hiscall_filled = 0;
+		}
 		break;
 	    }
 
-	// Double quote, send talk message to other nodes.
-	case '\"':
-	    {
+	    // Double quote, send talk message to other nodes.
+	    case '\"': {
 		if (lan_active != 0)
 		    talk();
 
 		break;
 	    }
 
-	// Ctrl-R (^R), toogle trx1, trx2 via lp0 pin 14.
-	case 18:
-	    {
+	    // Ctrl-R (^R), toogle trx1, trx2 via lp0 pin 14.
+	    case 18: {
 		if (k_pin14 == 0) {
 		    k_pin14 = 1;
 		    netkeyer(K_SET14, "1");
@@ -1052,10 +996,9 @@ char callinput(void)
 		break;
 	    }
 
-	// Ctrl-T (^T) or Alt-i (M-i), show talk messages.
-	case 20:
-	case 233:
-	    {
+	    // Ctrl-T (^T) or Alt-i (M-i), show talk messages.
+	    case 20:
+	    case 233: {
 		if (lan_active != 0) {
 
 		    for (t = 0; t <= 5; t++)
@@ -1083,34 +1026,34 @@ char callinput(void)
 	// Ctrl-<Page-Up>, increase cqdelay by 1/2 second.
 	// Alt-<Page-Up>, same for terminals that consume Ctrl-<Page-Up>.
 	if ((key_kPRV3 && x == key_kPRV3)
-	    || (key_kPRV5 && x == key_kPRV5)) {
+		|| (key_kPRV5 && x == key_kPRV5)) {
 
-		if (cqdelay <= 60) {
-		    cqdelay++;
+	    if (cqdelay <= 60) {
+		cqdelay++;
 
-		    attron(COLOR_PAIR(C_HEADER) | A_STANDOUT);
-		    mvprintw(0, 19, "  ");
-		    mvprintw(0, 19, "%i", cqdelay);
-		}
+		attron(COLOR_PAIR(C_HEADER) | A_STANDOUT);
+		mvprintw(0, 19, "  ");
+		mvprintw(0, 19, "%i", cqdelay);
+	    }
 
-		break;
+	    break;
 	}
 
 
 	// Ctrl-<Page-Down>, decrease cqdelay by 1/2 Second.
 	// Alt-<Page-Down>, same for terminals that consume Ctrl-<Page-Down>.
 	if ((key_kNXT3 && x == key_kNXT3)
-	    || (key_kNXT5 && x == key_kNXT5)) {
+		|| (key_kNXT5 && x == key_kNXT5)) {
 
-		if (cqdelay >= 4) {
-		    cqdelay--;
+	    if (cqdelay >= 4) {
+		cqdelay--;
 
-		    attron(COLOR_PAIR(C_HEADER) | A_STANDOUT);
-		    mvprintw(0, 19, "  ");
-		    mvprintw(0, 19, "%i", cqdelay);
-		}
+		attron(COLOR_PAIR(C_HEADER) | A_STANDOUT);
+		mvprintw(0, 19, "  ");
+		mvprintw(0, 19, "%i", cqdelay);
+	    }
 
-		break;
+	    break;
 	}
 
 
@@ -1138,7 +1081,7 @@ char callinput(void)
 
 	    if (atoi(hiscall) < 1800) {	/*  no frequency */
 
-		showinfo( getctydata(hiscall) );
+		showinfo(getctydata(hiscall));
 		searchlog(hiscall);
 	    }
 
@@ -1161,7 +1104,7 @@ char callinput(void)
 	}
 
 	if ((x == '\n' || x == KEY_ENTER) || x == 32 || x == 9 || x == 11
-	    || x == 44 || x == 92) {
+		|| x == 44 || x == 92) {
 	    break;
 	}
 
@@ -1180,7 +1123,7 @@ char callinput(void)
 int plain_number(char *str) {
     int i;
 
-    for (i=0; i < strlen(str); i++) {
+    for (i = 0; i < strlen(str); i++) {
 	if (!isdigit(str[i])) {
 	    return false;
 	}
@@ -1206,8 +1149,8 @@ int plain_number(char *str) {
  *          ESC - transmission has stopped
  *          \n  - timeout or CR pressed -> send exchange
  */
-int autosend()
-{
+int autosend() {
+
     extern int early_started;
     extern int sending_call;
     extern char hiscall_sent[];
@@ -1277,7 +1220,7 @@ int autosend()
 
 	    /* insert into hiscall */
 	    hiscall[len] = x;
-	    hiscall[len+1] = '\0';
+	    hiscall[len + 1] = '\0';
 
 	    /* display it  */
 	    printcall();
@@ -1292,7 +1235,7 @@ int autosend()
 
 	    len = strlen(hiscall_sent);
 	    hiscall_sent[len] = x;
-	    hiscall_sent[len+1] = '\0';
+	    hiscall_sent[len + 1] = '\0';
 	}
     }
 
@@ -1301,13 +1244,12 @@ int autosend()
 }
 
 
-int play_file(char *audiofile)
-{
+int play_file(char *audiofile) {
 
     extern int txdelay;
     extern unsigned char rigptt;
 
-    int fd,rc;
+    int fd, rc;
     char playcommand[120];
 
     if (*audiofile == '\0')
@@ -1317,27 +1259,25 @@ int play_file(char *audiofile)
 	mvprintw(24, 0, "cannot open sound file %s!", audiofile);
     } else {
 	close(fd);
-	if (access("./play_vk", X_OK) == 0 ) {
-	   sprintf( playcommand, "./play_vk %s", audiofile);
-	}
-	else {
-	   sprintf( playcommand, "play_vk %s", audiofile);
+	if (access("./play_vk", X_OK) == 0) {
+	    sprintf(playcommand, "./play_vk %s", audiofile);
+	} else {
+	    sprintf(playcommand, "play_vk %s", audiofile);
 	}
 #ifdef HAVE_LIBHAMLIB
 	/* CAT PTT wanted and available, use it. */
 	if (rigptt == 0x03) {
 	    /* Request PTT On */
 	    rigptt |= (1 << 3);		/* 0x0b */
-	}
-	else {		/* Fall back to netkeyer interface */
+	} else {		/* Fall back to netkeyer interface */
 #endif
-	netkeyer(K_PTT, "1");	// ptt on
+	    netkeyer(K_PTT, "1");	// ptt on
 #ifdef HAVE_LIBHAMLIB
 	}
 #endif
 
 	usleep(txdelay * 1000);
-	rc=system(playcommand);
+	rc = system(playcommand);
 	printcall();
 
 #ifdef HAVE_LIBHAMLIB
@@ -1346,10 +1286,9 @@ int play_file(char *audiofile)
 
 	    /* Request PTT Off */
 	    rigptt |= (1 << 4);		/* 0x17 */
-	}
-	else {		/* Fall back to netkeyer interface */
+	} else {		/* Fall back to netkeyer interface */
 #endif
-	netkeyer(K_PTT, "0");	// ptt off
+	    netkeyer(K_PTT, "0");	// ptt off
 #ifdef HAVE_LIBHAMLIB
 	}
 #endif
@@ -1359,8 +1298,8 @@ int play_file(char *audiofile)
 }
 
 
-void send_bandswitch(int freq)
-{
+void send_bandswitch(int freq) {
+
     extern int use_bandoutput;
     extern int bandinx;
     extern int bandindexarray[];
@@ -1371,32 +1310,32 @@ void send_bandswitch(int freq)
     if (use_bandoutput == 1) {
 	if (freq > 15) {	// cannot be a freq...
 	    switch ((int) freq) {
-	    case 1800 ... 2000:
-		bandswitch = 1;
-		break;
-	    case 3500 ... 4000:
-		bandswitch = 2;
-		break;
-	    case 7000 ... 7300:
-		bandswitch = 3;
-		break;
-	    case 10100 ... 10150:
-		bandswitch = 4;
-		break;
-	    case 14000 ... 14350:
-		bandswitch = 5;
-		break;
-	    case 18068 ... 18168:
-		bandswitch = 6;
-		break;
-	    case 21000 ... 21450:
-		bandswitch = 7;
-		break;
-	    case 24890 ... 24990:
-		bandswitch = 8;
-		break;
-	    case 28000 ... 29700:
-		bandswitch = 9;
+		case 1800 ... 2000:
+		    bandswitch = 1;
+		    break;
+		case 3500 ... 4000:
+		    bandswitch = 2;
+		    break;
+		case 7000 ... 7300:
+		    bandswitch = 3;
+		    break;
+		case 10100 ... 10150:
+		    bandswitch = 4;
+		    break;
+		case 14000 ... 14350:
+		    bandswitch = 5;
+		    break;
+		case 18068 ... 18168:
+		    bandswitch = 6;
+		    break;
+		case 21000 ... 21450:
+		    bandswitch = 7;
+		    break;
+		case 24890 ... 24990:
+		    bandswitch = 8;
+		    break;
+		case 28000 ... 29700:
+		    bandswitch = 9;
 	    }
 	} else			// use the bandinx
 	    bandswitch = bandinx + 1;
@@ -1412,11 +1351,11 @@ static void next_band(int direction) {
     bandinx += direction;
 
     if (bandinx < 0) {
-        bandinx = BANDINDEX_OOB - 1;
+	bandinx = BANDINDEX_OOB - 1;
     }
 
     if (bandinx >= BANDINDEX_OOB) {
-        bandinx = 0;
+	bandinx = 0;
     }
 }
 
@@ -1426,14 +1365,14 @@ static void next_band(int direction) {
 void handle_bandswitch(int direction) {
     // make sure call field is empty and arrows are enabled
     if (*hiscall != '\0' || no_arrows) {
-        return;
+	return;
     }
 
     next_band(direction);
 
     if (contest == 1 && dxped == 0) {
 	while (IsWarcIndex(bandinx)) {	/* loop till next contest band */
-            next_band(direction);
+	    next_band(direction);
 	}
     }
 
@@ -1441,8 +1380,8 @@ void handle_bandswitch(int direction) {
     mvprintw(12, 0, band[bandinx]);
 
     if (trx_control) {
-        freq = bandfrequency[bandinx]; // TODO: is this needed?
-        set_outfreq(bandfrequency[bandinx] * 1000);
+	freq = bandfrequency[bandinx]; // TODO: is this needed?
+	set_outfreq(bandfrequency[bandinx] * 1000);
     }
 
     send_bandswitch(bandinx);

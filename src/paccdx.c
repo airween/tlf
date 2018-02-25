@@ -25,8 +25,7 @@
 #include "tlf.h"
 
 
-int pacc_pa(void)
-{
+int pacc_pa(void) {
 
     extern int w_cty;
     extern int ve_cty;
@@ -56,12 +55,12 @@ int pacc_pa(void)
 
     switch (bandinx) {
 
-    case BANDINDEX_160:
-    case BANDINDEX_80:
-    case BANDINDEX_40:
-    case BANDINDEX_20:
-    case BANDINDEX_15:
-    case BANDINDEX_10:
+	case BANDINDEX_160:
+	case BANDINDEX_80:
+	case BANDINDEX_40:
+	case BANDINDEX_20:
+	case BANDINDEX_15:
+	case BANDINDEX_10:
 	    i = inxes[bandinx];
 	    j = bandinx;
 	    break;

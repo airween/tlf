@@ -43,15 +43,15 @@ static int onechar(void);
 
 /** fake refresh code to use update logic for panels */
 void refreshp() {
-    pthread_mutex_lock( &panel_mutex );
+    pthread_mutex_lock(&panel_mutex);
     update_panels();
     doupdate();
-    pthread_mutex_unlock( &panel_mutex );
+    pthread_mutex_unlock(&panel_mutex);
 }
 
 
 /** add A_BOLD to attributes if 'use_rxvt' is not set */
-int modify_attr( int attr ) {
+int modify_attr(int attr) {
 
     if (use_rxvt == 0)
 	attr |= A_BOLD;
@@ -78,7 +78,7 @@ int lookup_key(char *capability) {
 
     esc_sequence = tigetstr(capability);
 
-    if (esc_sequence == NULL || esc_sequence == (char *)-1) {
+    if (esc_sequence == NULL || esc_sequence == (char *) - 1) {
 	return 0;
     }
 
@@ -117,16 +117,14 @@ void lookup_keys() {
 /** key_get  wait for next key from terminal
  *
  */
-int key_get()
-{
+int key_get() {
     return getkey(1);
 }
 
 /** key_poll return next key from terminal if there is one
  *
  */
-int key_poll()
-{
+int key_poll() {
     return getkey(0);
 }
 
@@ -136,8 +134,7 @@ int key_poll()
  * leaves 'nodelay' afterwards always as FALSE (meaning: wait for
  * character
  */
-static int getkey(int wait)
-{
+static int getkey(int wait) {
     int x = 0;
 
     nodelay(stdscr, wait ? FALSE : TRUE);
@@ -155,8 +152,7 @@ static int getkey(int wait)
  * keyname().  Also catches Escape and processes it immediately as well
  * as calling stoptx() for minimal delay.
  */
-static int onechar(void)
-{
+static int onechar(void) {
     int x = 0;
     int trash = 0;
 

@@ -27,7 +27,7 @@
 #include "gettxinfo.h"
 
 
-void change_freq (void) {
+void change_freq(void) {
 
     extern float freq;
     extern int trx_control;
@@ -47,62 +47,56 @@ void change_freq (void) {
 	if (get_outfreq() == 0) {
 	    x = key_get();
 
-            int deltaf = 0;
+	    int deltaf = 0;
 
 	    switch (x) {
 
-	    // Up arrow, raise frequency by 100 Hz.
-	    case KEY_UP:
-		{
+		// Up arrow, raise frequency by 100 Hz.
+		case KEY_UP: {
 		    deltaf = 100;
 		    break;
 		}
 
-	    // Down arrow, lower frequency by 100 Hz.
-	    case KEY_DOWN:
-		{
+		// Down arrow, lower frequency by 100 Hz.
+		case KEY_DOWN: {
 		    deltaf = -100;
 		    break;
 		}
 
-	    // Right arrow, raise frequency by 20 Hz.
-	    case KEY_RIGHT:
-		{
+		// Right arrow, raise frequency by 20 Hz.
+		case KEY_RIGHT: {
 		    deltaf = 20;
 		    break;
 		}
 
-	    // Left arrow, lower frequency by 20 Hz.
-	    case KEY_LEFT:
-		{
+		// Left arrow, lower frequency by 20 Hz.
+		case KEY_LEFT: {
 		    deltaf = -20;
 		    break;
 		}
 
-	    // <Page-Up>, raise frequency by 500 Hz.
-	    case KEY_PPAGE:
-		{
+		// <Page-Up>, raise frequency by 500 Hz.
+		case KEY_PPAGE: {
 		    deltaf = 500;
 		    break;
 		}
 
-	    // <Page-Down>, lower frequency by 500 Hz.
-	    case KEY_NPAGE:
-		{
+		// <Page-Down>, lower frequency by 500 Hz.
+		case KEY_NPAGE: {
 		    deltaf = -500;
 		    break;
 		}
 
-	    default:{
+		default: {
 		    brkflg = 1;
 		    break;
 		}
 
 	    }
 
-            if (deltaf) {
-                set_outfreq(freq * 1000 + deltaf);
-            }
+	    if (deltaf) {
+		set_outfreq(freq * 1000 + deltaf);
+	    }
 	}
 
 	if (brkflg == 1) {
