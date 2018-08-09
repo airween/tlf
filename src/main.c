@@ -553,6 +553,8 @@ void ui_init() {
 #ifdef HAVE_LINUX
     } else
 	putenv("TERM=rxvt");	/*or going to native console linux driver */
+#elif
+    }
 #endif
 
     /* Check the environment variable ESCDELAY.
