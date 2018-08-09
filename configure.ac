@@ -154,6 +154,28 @@ AS_IF([test "x$wantfldigixmlrpc" = xtrue], [
 	dnl else Fldigi XML RPC not wanted
 	AC_MSG_RESULT([no])])
 
+dnl Check operating system
+AC_CANONICAL_HOST
+
+# Detect the target system
+case "${host_os}" in
+	linux*)
+	    AC_DEFINE([HAVE_LINUX], [1],
+		[Define to 1 if OS is Linux.])
+	    ;;
+	freebsd*)
+	    AC_DEFINE([HAVE_FREEBSD], [1],
+		[Define to 1 if OS is FreeBSD.])
+	    ;;
+	darwin*)
+	    AC_DEFINE([HAVE_OSX], [1],
+		[Define to 1 if OS is OSX.])
+	    ;;
+	*)
+	AC_MSG_ERROR(["OS $host_os is not supported"])
+	;;
+esac
+
 
 dnl Set warnings for compilation
 dnl CFLAGS is reserved for user, so set the AM_* counterpart.
