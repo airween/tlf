@@ -236,7 +236,7 @@ void draw_qtc_panel(int direction) {
 		show_rtty_lines();
 	    }
 	} else {
-	    if (qtcrec_record == 1) {
+	    if (qtcrec_record == 1 && record_run == -1) {
 		mvwprintw(qtcwin, 2, 11, "RECORD OFF  ");
 	    }
 	}
@@ -278,7 +278,7 @@ void stop_qtc_recording() {
 	strcat(reccommand, qtcrec_record_command_shutdown);
 	system(reccommand);
 	record_run = -1;
-	if (qtcrec_record == 1) {
+	if (qtcrec_record == 1 && record_run == -1) {
 	    mvwprintw(qtcwin, 2, 11, "RECORD OFF  ");
 	}
     }
