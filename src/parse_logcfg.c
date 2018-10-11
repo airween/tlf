@@ -631,6 +631,7 @@ int parse_logcfg(char *inputbuffer) {
 	    break;
 	}
     }
+
     switch (ii) {
 
 	case 0: {
