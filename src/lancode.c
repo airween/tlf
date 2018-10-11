@@ -66,7 +66,7 @@ int send_error_limit[MAXNODES];
 /* default port to listen for incomming packets and to send packet to */
 char default_lan_service[16] = "6788";
 /* lan port parsed from config */
-int lan_port = 0;
+int lan_port = 6788;
 
 int lan_active = 0;
 int send_error[MAXNODES];
@@ -93,22 +93,13 @@ int resolveService(const char *service) {
     struct servent *service_ent;
     service_ent = getservbyname(service, "udp");
     int port = 0;
-    extern int lan_port;
-    /* if we have no lan port from parse config */
-    if(lan_port == 0 ) {
-      /* lookup port based on services db - does .. this ever work? */
-      if (service_ent != NULL) {
-	    port = service_ent->s_port;
-      } else if (strlen(service) > 0) {
-	    port = atoi(service);
-      }
-      /* if no port was returned from service entry, use the default port */
-      if (port == 0) {
-        /* any reason not to store default port as int instead of char arr?*/
-        port = atoi(default_lan_service);
-      }
-    } else {
-	port = lan_port;
+    if (service_ent != NULL) {
+	port = service_ent->s_port;
+    } else if (strlen(service) > 0) {
+	port = atoi(service);
+    }
+    if (port == 0) {
+	port = atoi(default_lan_service);
     }
     return port;
 }
@@ -117,6 +108,7 @@ int lanrecv_init(void) {
     if (lan_active == 0)
 	return (1);
 
+    sprintf(default_lan_service, "%d", lan_port);
     bzero(&lan_sin, sizeof(lan_sin));
     lan_sin.sin_family = AF_INET;
     lan_sin.sin_addr.s_addr = htonl(INADDR_ANY);
