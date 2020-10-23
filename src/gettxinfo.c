@@ -35,6 +35,7 @@
 #include "tlf_curses.h"
 #include "callinput.h"
 #include "bands.h"
+#include "clear_display.h"
 
 #include <hamlib/rig.h>
 
@@ -57,6 +58,7 @@ extern freq_t bandfrequency[];
 
 extern int trx_control;
 extern unsigned char rigptt;
+extern int rigmode_follow;
 
 /* output frequency to rig or other rig-related request
  *
@@ -170,6 +172,7 @@ void gettxinfo(void) {
 		if (retvalmode != RIG_OK) {
 		    rigmode = RIG_MODE_NONE;
 		}
+
 	    }
 	}
 
@@ -188,7 +191,26 @@ void gettxinfo(void) {
 	    freq = 0.0;
 	    return;
 	}
-
+	else {
+	    if (rigmode_follow == 1) {
+		retvalmode = rig_get_mode(my_rig, RIG_VFO_CURR, &rigmode, &bwidth);
+		if (retvalmode != RIG_OK) {
+		    rigmode = RIG_MODE_NONE;
+		}
+		if (rigmode == RIG_MODE_CW && trxmode != CWMODE) {
+		    trxmode = CWMODE;
+		    mvprintw(13, 29, "TRXMODE = CW");
+		    refreshp();
+		    clear_display();
+		}
+		if (rigmode & RIG_MODE_SSB && trxmode != SSBMODE) {
+		    trxmode = SSBMODE;
+		    mvprintw(13, 29, "TRXMODE = SSB");
+		    refreshp();
+		    clear_display();
+		}
+	    }
+	}
 
 	if (rigfreq >= bandcorner[0][0]) {
 	    freq = rigfreq; // Hz

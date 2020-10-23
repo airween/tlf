@@ -317,6 +317,7 @@ int parse_logcfg(char *inputbuffer) {
     extern int unique_call_multi;
     extern int lan_port;
     extern int verbose;
+    extern int rigmode_follow;
 
     char *commands[] = {
 	"enable",		/* 0 */		/* deprecated */
@@ -585,7 +586,8 @@ int parse_logcfg(char *inputbuffer) {
 	"ALT_DK10",
 	"CALLMASTER",
 	"LAN_PORT",                     /* 264 */
-	"SECTION_MULT_ONCE"
+	"SECTION_MULT_ONCE",
+	"RIGMODE_FOLLOW",
     };
 
     char **fields;
@@ -1996,6 +1998,10 @@ int parse_logcfg(char *inputbuffer) {
 	}
 	case 265: {
 	    sectn_mult_once = 1;
+	    break;
+	}
+	case 266: {
+	    rigmode_follow = 1;
 	    break;
 	}
 	default: {

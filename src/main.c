@@ -183,6 +183,7 @@ char exchange_list[40] = "";
 int timeoffset = 0;
 int trxmode = CWMODE;
 rmode_t  rigmode = RIG_MODE_NONE;
+int rigmode_follow = 0;
 
 bool mixedmode = false;
 char sent_rst[4] = "599";
